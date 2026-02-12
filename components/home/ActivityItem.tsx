@@ -108,7 +108,7 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ activity, index }) => {
       style={{ animationDelay: `${index * 50}ms` }}
     >
       {/* Avatar */}
-      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-icon-box flex items-center justify-center text-text-heading font-semibold text-sm">
+      <div className="shrink-0 w-10 h-10 rounded-full bg-icon-box flex items-center justify-center text-text-heading font-semibold text-sm">
         {activity.userInitials}
       </div>
 

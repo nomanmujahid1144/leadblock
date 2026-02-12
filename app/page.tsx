@@ -7,7 +7,7 @@ import { statsData, quickActionsData, recentActivities } from '@/data/home/mockD
 
 export default function Home() {
   return (
-    <div className="min-h-screen max-w-[1400px] mx-auto px-6 lg:px-6 xl:px-8">
+    <div className="min-h-screen max-w-350 mx-auto px-6 lg:px-6 xl:px-8">
       {/* Header */}
       <Header />
 
