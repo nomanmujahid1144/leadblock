@@ -7,7 +7,7 @@ import { statsData, quickActionsData, recentActivities } from '@/data/home/mockD
 
 export default function Home() {
   return (
-    <div className="min-h-screen max-w-[1400px] mx-auto px-6 lg:px-8">
+    <div className="min-h-screen max-w-[1400px] mx-auto px-6 lg:px-6 xl:px-8">
       {/* Header */}
       <Header />
 
@@ -34,7 +34,7 @@ export default function Home() {
         </section>
 
         {/* Recent Activity Section */}
-        <section className="bg-white rounded-lg border border-neutral-200 px-4 py-2.5 animate-fade-in w-1/2" style={{ animationDelay: '800ms' }}>
+        <section className="bg-white rounded-lg border border-neutral-200 px-4 py-2.5 animate-fade-in w-full lg:w-1/2" style={{ animationDelay: '800ms' }}>
           <h2 className="text-xl font-bold text-neutral-900 mb-2.5">Recent Activity</h2>
           <div className="space-y-0">
             {recentActivities.map((activity, index) => (

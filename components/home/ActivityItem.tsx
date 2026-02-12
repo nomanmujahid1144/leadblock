@@ -34,7 +34,7 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ activity, index }) => {
                   <div className="flex flex-wrap items-center gap-4 text-xs text-text">
                     <div className="flex items-center gap-1">
                       <CalendarIcon size={12} />
-                       Chatter: <span className='font-medium'>{activity.details.chatterDate}</span>
+                      Chatter: <span className='font-medium'>{activity.details.chatterDate}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <TimeIcon size={12} />
@@ -44,10 +44,10 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ activity, index }) => {
                   <p className="text-xs text-text">{activity.timestamp}</p>
                 </div>
               </div>
-              <div className='flex justify-center items-center h-full'>
-              <span className="px-2 py-0.5 bg-icon-box text-text text-xs font-medium rounded-lg whitespace-nowrap">
-                Sentiment: Neutral
-              </span>
+              <div className='self-center'>
+                <span className="px-2 py-1 bg-icon-box text-text text-xs font-medium rounded-lg whitespace-nowrap">
+                  Sentiment: Neutral
+                </span>
               </div>
             </div>
           </div>
@@ -87,9 +87,11 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ activity, index }) => {
                 <p className="text-xs text-text mt-1">{activity.timestamp}</p>
               </div>
               {activity.details.status && (
-                <span className="px-1.5 py-1 bg-primary/10 text-primary text-xs font-medium rounded-lg">
-                  {activity.details.status}
-                </span>
+                <div className='self-center'>
+                  <span className="px-1.5 py-1 bg-primary/10 text-primary text-xs font-medium rounded-lg">
+                    {activity.details.status}
+                  </span>
+                </div>
               )}
             </div>
           </div>
