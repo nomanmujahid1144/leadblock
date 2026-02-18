@@ -8,7 +8,7 @@ interface HeroBannerProps {
 const HeroBanner: React.FC<HeroBannerProps> = ({ userName }) => {
   return (
     <div className="py-2">
-      <div className="relative h-[240px] lg:h-[280px] rounded-lg overflow-hidden">
+      <div className="relative h-banner-sm md:h-banner-md lg:h-banner-lg rounded-lg overflow-hidden">
         {/* Background Image */}
         <Image
           src="/home/background.png"
@@ -28,11 +28,11 @@ const HeroBanner: React.FC<HeroBannerProps> = ({ userName }) => {
         />
 
         {/* Content */}
-        <div className="relative h-full flex flex-col justify-center px-8 lg:px-12">
-          <h1 className="text-3xl lg:text-2xl font-bold text-white mb-2">
+        <div className="relative h-full flex flex-col justify-center px-5 md:px-8 lg:px-12">
+          <h1 className="text-xl md:text-3xl lg:text-2xl font-bold text-white mb-1 md:mb-2">
             Welcome back, {userName}
           </h1>
-          <p className="text-md text-white/90">
+          <p className="text-xs md:text-md text-white/80">
             Here's what's happening with your campaigns.
           </p>
         </div>

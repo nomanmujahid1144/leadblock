@@ -19,35 +19,39 @@ const QuickActionCard: React.FC<QuickActionCardProps> = ({ action, index }) => {
   const isPrimary = action.variant === 'primary';
 
   return (
-    <div className={`${action.bgColor} rounded-lg border ${isPrimary ? 'border-primary/20' : 'border-neutral-200'} p-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 animate-scale-in`}
-      style={{ animationDelay: `${(index + 4) * 100}ms` }} >
-      <div className='grid grid-rows-3'>
-        <div className="flex items-start row-span-2 gap-3 mb-4 w-9/12">
-          <div className={`${isPrimary ? 'bg-white' : 'bg-neutral-100'} rounded-lg w-9 h-9 flex justify-center items-center transition-transform hover:scale-110`}>
+    <div
+      className={`${action.bgColor} rounded-lg border ${isPrimary ? 'border-primary/20' : 'border-stroke'} p-3 md:p-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 animate-scale-in`}
+      style={{ animationDelay: `${(index + 4) * 100}ms` }}
+    >
+      <div className="flex flex-col justify-between h-full gap-3 md:gap-4">
+        {/* Icon + Text */}
+        <div className="flex items-start gap-2 md:gap-3">
+          <div className={`${isPrimary ? 'bg-primary' : 'bg-icon-box'} rounded-lg w-8 h-8 md:w-9 md:h-9 shrink-0 flex justify-center items-center transition-transform hover:scale-110`}>
             <IconComponent
-              className={isPrimary ? 'text-primary' : 'text-neutral-600'}
-              size={16}
+              className={isPrimary ? 'text-white' : 'text-text-heading'}
+              size={14}
             />
           </div>
           <div className="flex-1">
-            <h3 className="text-sm leading-4 font-semibold text-neutral-900 mb-1">
+            <h3 className="text-xs md:text-sm leading-4 font-semibold text-text-heading mb-0.5 md:mb-1">
               {action.title}
             </h3>
-            <p className="text-xs text-neutral-600">
+            <p className="text-xs text-text leading-4">
               {action.description}
             </p>
           </div>
         </div>
 
+        {/* Button */}
         <button
-          className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 group ${isPrimary
+          className={`w-full flex items-center justify-between px-3 md:px-4 py-2 md:py-2.5 cursor-pointer rounded-lg font-medium text-xs md:text-sm transition-all duration-200 group ${isPrimary
             ? 'bg-primary text-white hover:bg-primary-dark shadow-sm hover:shadow-md'
-            : 'bg-white text-neutral-700 border border-neutral-300 hover:border-neutral-400 hover:bg-neutral-50'
+            : 'bg-white text-text-heading border border-stroke hover:bg-white/10'
             }`}
         >
           <span>{action.buttonText}</span>
           <ArrowRightIcon
-            size={18}
+            size={16}
             className="group-hover:translate-x-1 transition-transform"
           />
         </button>
