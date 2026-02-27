@@ -180,7 +180,7 @@ export function computeQuickActions(
     },
     {
       id: '3',
-      title: 'All Prospects',
+      title: 'Full database',
       description: `${totalProspects} prospects in your list`,
       icon: 'user-list',
       buttonText: 'View Prospects',

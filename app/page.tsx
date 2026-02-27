@@ -1,4 +1,3 @@
-import Header from '@/components/Header';
 import HeroBanner from '@/components/home/HeroBanner';
 import StatCard from '@/components/home/StatCard';
 import QuickActionCard from '@/components/home/QuickActionCard';
@@ -7,15 +6,12 @@ import { statsData, quickActionsData, recentActivities, currentUserName } from '
 
 export default function Home() {
   return (
-    <div className="min-h-screen max-w-350 mx-auto px-4 md:px-6 xl:px-8">
-      {/* Header */}
-      <Header />
-
+    <div className="min-h-screen px-6 md:px-0">
       {/* Hero Banner */}
       <HeroBanner userName={currentUserName} />
 
       {/* Main Content */}
-      <main className="px-0 md:px-8 lg:px-10 py-6 md:py-8">
+      <main className="px-0 md:px-4 lg:px-6 py-6 md:py-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
           {statsData.map((stat, index) => (

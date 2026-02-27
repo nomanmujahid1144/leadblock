@@ -1,26 +1,41 @@
-import type { Metadata } from "next";
+'use client';
+
 import { Work_Sans } from "next/font/google";
 import "./globals.css";
+import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header";
+import { useState } from "react";
 
 const workSans = Work_Sans({
   variable: "--font-work-sans",
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "NOVA Dashboard",
-  description: "Lead management dashboard",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+
   return (
     <html lang="en">
       <body className={`${workSans.variable} font-sans antialiased`}>
-        {children}
+        <Header onMenuClick={() => setIsMobileOpen(!isMobileOpen)} />
+        <Sidebar 
+          isCollapsed={isCollapsed} 
+          setIsCollapsed={setIsCollapsed}
+          isMobileOpen={isMobileOpen}
+          setIsMobileOpen={setIsMobileOpen}
+        />
+        <main
+          className={`mt-16 transition-all duration-300 
+            ${isCollapsed ? 'lg:ml-16' : 'lg:ml-60'}
+          `}
+        >
+          {children}
+        </main>
       </body>
     </html>
   );
