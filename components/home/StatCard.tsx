@@ -1,5 +1,5 @@
 import React from 'react';
-import { UsersIcon, LinkIcon, MessageIcon, ThumbsUpIcon } from './Icons';
+import { UsersIcon, LinkIcon, MessageIcon, ThumbsUpIcon } from '../Icons';
 import { StatCard as StatCardType } from '@/types/home';
 
 interface StatCardProps {

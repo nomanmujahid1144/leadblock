@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChartIcon, UsersGroupIcon, UserListIcon, ChatIcon, ArrowRightIcon } from './Icons';
+import { ChartIcon, UsersGroupIcon, UserListIcon, ChatIcon, ArrowRightIcon } from '../Icons';
 import { QuickAction } from '@/types/home';
 
 interface QuickActionCardProps {

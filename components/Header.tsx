@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import { HomeIcon, ArrowRightIcon, LogoutIcon, MultiPersonsIcon } from './home/Icons';
+import { HomeIcon, ArrowRightIcon, LogoutIcon, MultiPersonsIcon } from './Icons';
 import Link from 'next/link';
 
 interface HeaderProps {

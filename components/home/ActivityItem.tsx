@@ -1,6 +1,6 @@
 import React from 'react';
 import { Activity } from '@/types/home';
-import { CalendarIcon, LinkedinIcon, TimeIcon } from './Icons';
+import { CalendarIcon, LinkedinIcon, TimeIcon } from '../Icons';
 import Link from 'next/link';
 
 interface ActivityItemProps {

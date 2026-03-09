@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { HomeScreenIcon, MultiPersonsIcon, DBIcon, ListIcon, SettingIcon, BlockListIcon, ChatIcon } from './home/Icons';
+import { HomeScreenIcon, MultiPersonsIcon, DBIcon, ListIcon, SettingIcon, BlockListIcon, ChatIcon } from './Icons';
 
 interface MenuItem {
   id: string;
