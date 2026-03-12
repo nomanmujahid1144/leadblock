@@ -4,6 +4,7 @@ export const leadsColumns = [
     title: 'Lead needs to be reviewed',
     count: 3,
     color: 'bg-yellow-100',
+    isVertical: false,
     cards: [
       {
         id: '1',
@@ -22,6 +23,7 @@ export const leadsColumns = [
     title: 'Will follow up myself',
     count: 1,
     color: 'bg-blue-100',
+    isVertical: false,
     cards: [
       {
         id: '4',
@@ -40,6 +42,7 @@ export const leadsColumns = [
     title: 'LeadBlocks can follow up',
     count: 0,
     color: 'bg-neutral-100',
+    isVertical: false,
     cards: [
       {
         id: '5',
@@ -58,6 +61,7 @@ export const leadsColumns = [
     title: 'In Progress',
     count: 1,
     color: 'bg-purple-100',
+    isVertical: true,
     cards: []
   },
   {
@@ -65,6 +69,7 @@ export const leadsColumns = [
     title: 'Meeting planned',
     count: 1,
     color: 'bg-green-100',
+    isVertical: true,
     cards: []
   },
   {
@@ -72,6 +77,7 @@ export const leadsColumns = [
     title: 'Archived',
     count: 7,
     color: 'bg-neutral-100',
+    isVertical: true,
     cards: []
   }
 ];

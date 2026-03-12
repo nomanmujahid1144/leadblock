@@ -184,8 +184,19 @@ export const ViewMoreIcon: React.FC<IconProps> = ({ className = '', size = 20 })
         <circle cx="15.5" cy="10.5" r="1.5" fill="#36465F" />
     </svg>
 );
-export const DoubleArrowIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
-    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+export const DoubleArrowIcon: React.FC<IconProps & { isCollapsed?: boolean }> = ({
+    className = '',
+    size = 20,
+    isCollapsed = false
+}) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 20 20"
+        fill="none"
+        className={`transition-transform duration-300 ${isCollapsed ? '-rotate-90' : ''} ${className}`}
+        xmlns="http://www.w3.org/2000/svg"
+    >
         <path d="M18.3335 2.5L9.5835 8.76365L0.833496 2.50135L0.833496 4.14231L9.5835 10.4073L18.3335 4.14231V2.5ZM18.3335 10.3023L9.5835 16.5673L0.833496 10.301L0.833496 11.9433L9.5835 18.2083L18.3335 11.9433V10.3023Z" fill="#34446F" />
     </svg>
 );
@@ -226,6 +237,12 @@ export const SortIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => 
         <path d="M0.416504 5.75H3.52761" stroke="currentColor" strokeWidth="0.833333" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M0.416504 0.416687H7.52762" stroke="currentColor" strokeWidth="0.833333" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M7.30545 8.41671V3.08337M7.30545 8.41671C6.99423 8.41671 6.41279 7.53035 6.19434 7.3056M7.30545 8.41671C7.61666 8.41671 8.1981 7.53035 8.41656 7.3056" stroke="currentColor" strokeWidth="0.833333" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+export const PlusIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
+    <svg width={size} height={size} viewBox="0 0 12 12" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M2.5 6H9.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M6 2.5V9.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 );
 
