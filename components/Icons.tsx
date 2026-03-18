@@ -220,8 +220,19 @@ export const SearchIcon: React.FC<IconProps> = ({ className = '', size = 20 }) =
         <path d="M9.83572 9.04709L7.94744 7.16436C8.55668 6.3882 8.88725 5.42973 8.88603 4.44301C8.88603 3.56427 8.62545 2.70526 8.13724 1.97461C7.64904 1.24396 6.95514 0.674487 6.14328 0.338206C5.33143 0.00192505 4.43809 -0.0860614 3.57623 0.0853732C2.71437 0.256808 1.9227 0.679964 1.30133 1.30133C0.679964 1.9227 0.256808 2.71437 0.0853732 3.57623C-0.0860614 4.43809 0.00192505 5.33143 0.338206 6.14328C0.674487 6.95514 1.24396 7.64904 1.97461 8.13724C2.70526 8.62545 3.56427 8.88603 4.44301 8.88603C5.42973 8.88725 6.3882 8.55668 7.16436 7.94744L9.04709 9.83572C9.09872 9.88777 9.16014 9.92909 9.22782 9.95729C9.2955 9.98548 9.36809 10 9.4414 10C9.51472 10 9.58731 9.98548 9.65499 9.95729C9.72267 9.92909 9.78409 9.88777 9.83572 9.83572C9.88777 9.78409 9.92909 9.72267 9.95729 9.65499C9.98548 9.58731 10 9.51472 10 9.4414C10 9.36809 9.98548 9.2955 9.95729 9.22782C9.92909 9.16014 9.88777 9.09872 9.83572 9.04709ZM1.11076 4.44301C1.11076 3.78396 1.30619 3.1397 1.67234 2.59171C2.0385 2.04372 2.55892 1.61662 3.16781 1.36441C3.77671 1.1122 4.44671 1.04621 5.09311 1.17478C5.7395 1.30336 6.33325 1.62073 6.79928 2.08675C7.2653 2.55278 7.58267 3.14653 7.71125 3.79292C7.83982 4.43932 7.77383 5.10932 7.52162 5.71821C7.26941 6.32711 6.84231 6.84753 6.29432 7.21369C5.74633 7.57984 5.10207 7.77527 4.44301 7.77527C3.55924 7.77527 2.71167 7.4242 2.08675 6.79928C1.46183 6.17436 1.11076 5.32678 1.11076 4.44301Z" fill="#878790" />
     </svg>
 );
-export const ArrowDownIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
-    <svg width={size} height={size} viewBox="0 0 10 6" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+export const ArrowDownIcon: React.FC<IconProps & { rotate?: boolean }> = ({
+    className = '',
+    size = 20,
+    rotate = false
+}) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 10 6"
+        fill="none"
+        className={`${className} ${rotate ? 'transition-transform rotate-180' : 'transition-transform'}`}
+        xmlns="http://www.w3.org/2000/svg"
+    >
         <path d="M0.353516 0.353577L4.85352 4.85358L9.35352 0.353577" stroke="currentColor" />
     </svg>
 );
@@ -245,4 +256,31 @@ export const PlusIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => 
         <path d="M6 2.5V9.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 );
+export const CalendarLeadIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
+    <svg width={size} height={size} viewBox="0 0 14 14" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M1.5 2C1.23478 2 0.98043 2.10536 0.792893 2.29289C0.605357 2.48043 0.5 2.73478 0.5 3V12.5C0.5 12.7652 0.605357 13.0196 0.792893 13.2071C0.98043 13.3946 1.23478 13.5 1.5 13.5H12.5C12.7652 13.5 13.0196 13.3946 13.2071 13.2071C13.3946 13.0196 13.5 12.7652 13.5 12.5V3C13.5 2.73478 13.3946 2.48043 13.2071 2.29289C13.0196 2.10536 12.7652 2 12.5 2H10.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M0.5 5.5H13.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M3.5 0.5V3.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M10.5 0.5V3.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M3.5 2H8.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+export const DoublePrevIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M11.7265 12L12.6665 11.06L9.61317 8L12.6665 4.94L11.7265 4L7.7265 8L11.7265 12Z" fill="black" />
+        <path d="M7.33344 12L8.27344 11.06L5.2201 8L8.27344 4.94L7.33344 4L3.33344 8L7.33344 12Z" fill="black" />
+    </svg>
+);
+export const DoubleNextIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M4.2735 4L3.3335 4.94L6.38683 8L3.3335 11.06L4.2735 12L8.2735 8L4.2735 4Z" fill="black" />
+        <path d="M8.66656 4L7.72656 4.94L10.7799 8L7.72656 11.06L8.66656 12L12.6666 8L8.66656 4Z" fill="black" />
+    </svg>
+);
+export const TickCorrectIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
+    <svg width={size} height={size} viewBox="0 0 14 14" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M11.6668 3.5L5.25016 9.91667L2.3335 7" stroke="currentColor" strokeWidth="1.16667" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import KanbanColumn from './KanbanColumn';
 import AddLeadPhaseButton from './AddLeadPhaseButton';
 import AddLeadPhaseModal from './AddLeadPhaseModal';
@@ -17,7 +17,12 @@ interface Column {
 // Import initial data
 import { leadsColumns as initialColumns } from '@/data/leads/mockData';
 
-const KanbanBoard = () => {
+interface KanbanBoardProps {
+  searchQuery: string;
+  selectedSort: string;
+}
+
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ searchQuery, selectedSort }) => {
   const [columns, setColumns] = useState<Column[]>(initialColumns);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -34,13 +39,53 @@ const KanbanBoard = () => {
     setColumns([...columns, newColumn]);
   };
 
+  // Filter and sort columns
+  const filteredColumns = useMemo(() => {
+    return columns.map(column => {
+      // Filter cards based on search query
+      const filteredCards = column.cards.filter(card => {
+        const searchLower = searchQuery.toLowerCase();
+        return (
+          card.name.toLowerCase().includes(searchLower) ||
+          card.company.toLowerCase().includes(searchLower) ||
+          card.title.toLowerCase().includes(searchLower)
+        );
+      });
+
+      // Sort cards based on selectedSort
+      const sortedCards = [...filteredCards].sort((a, b) => {
+        switch (selectedSort) {
+          case 'name':
+            return a.name.localeCompare(b.name);
+          case 'company':
+            return a.company.localeCompare(b.company);
+          case 'sentiment':
+            return a.sentiment.localeCompare(b.sentiment);
+          case 'date':
+            // Sort by chatterDate or internalDate (newest first)
+            const dateA = new Date(a.chatterDate || a.internalDate || 0);
+            const dateB = new Date(b.chatterDate || b.internalDate || 0);
+            return dateB.getTime() - dateA.getTime();
+          default:
+            return 0;
+        }
+      });
+
+      return {
+        ...column,
+        cards: sortedCards,
+        count: sortedCards.length
+      };
+    });
+  }, [columns, searchQuery, selectedSort]);
+
   return (
     <>
       <div className="relative">
         {/* Horizontal Scroll Container */}
         <div className="overflow-x-auto pb-4">
           <div className="inline-flex gap-1 min-w-full">
-            {columns.map((column) => (
+            {filteredColumns.map((column) => (
               <KanbanColumn
                 key={column.id}
                 title={column.title}
@@ -51,13 +96,7 @@ const KanbanBoard = () => {
               />
             ))}
             
-            {/* Spacer to push button to the right */}
-            {/* <div className="flex-1 min-w-4" /> */}
-            
-            {/* Add New Phase Button - Sticky to right */}
-            {/* <div className="sticky right-0">
-            </div> */}
-              <AddLeadPhaseButton onClick={() => setIsModalOpen(true)} />
+            <AddLeadPhaseButton onClick={() => setIsModalOpen(true)} />
           </div>
         </div>
       </div>

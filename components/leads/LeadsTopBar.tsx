@@ -1,32 +1,44 @@
 'use client';
 
 import React from 'react';
-import { ArrowDownIcon, FilterIcon, GridViewIcon, ListViewIcon, SearchIcon, SortIcon } from '../Icons';
+import { ArrowDownIcon, GridViewIcon, ListViewIcon, SearchIcon } from '../Icons';
+import SortByDropdown from './dropdowns/SortByDropdown';
+import FilterDropdown from './dropdowns/FilterDropdown';
 
-const LeadsTopBar = () => {
+interface LeadsTopBarProps {
+    searchQuery: string;
+    onSearchChange: (query: string) => void;
+    selectedSort: string;
+    onSortChange: (sort: string) => void;
+}
+
+const LeadsTopBar: React.FC<LeadsTopBarProps> = ({
+    searchQuery,
+    onSearchChange,
+    selectedSort,
+    onSortChange
+}) => {
     return (
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 animate-fade-in">
             {/* Left: Title + Buttons */}
             <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-lg md:text-sm text-text-breadcrumb">Leads</h1>
 
-                {/* Sort Button */}
-                <button className="flex items-center gap-2 px-3 py-2 text-lg md:text-sm text-text-breadcrumb border border-stroke rounded-lg hover:bg-neutral-50 hover:border-stroke/85 transition-all">
-                    <span>Sort</span>
-                    <SortIcon size={12} />
-                </button>
+                {/* Sort Dropdown */}
+                <SortByDropdown 
+                    selectedSort={selectedSort} 
+                    onSortChange={onSortChange} 
+                />
 
-                {/* Filter Button */}
-                <button className="flex items-center gap-2 px-3 py-2 text-lg md:text-sm text-text-breadcrumb border border-stroke rounded-lg hover:bg-neutral-50 hover:border-stroke/85 transition-all">
-                    <span>Filter</span>
-                    <FilterIcon size={12} />
-                </button>
+                {/* Filter Dropdown */}
+                <FilterDropdown />
 
                 {/* Status Dropdown */}
-                <button className="flex items-center gap-2 px-3 py-2 text-lg md:text-sm text-text-breadcrumb border border-stroke rounded-lg hover:bg-neutral-50 hover:border-stroke/85 transition-all">
+                <button className="flex items-center gap-2 px-3 py-2 text-sm text-text-breadcrumb border border-stroke rounded-lg hover:bg-neutral-50 hover:border-stroke/85 transition-all">
                     <span>Status</span>
                     <ArrowDownIcon size={12} />
                 </button>
+
                 {/* Search Input */}
                 <div className="flex-1 md:flex-none md:w-96">
                     <div className="relative">
@@ -34,7 +46,9 @@ const LeadsTopBar = () => {
                         <input
                             type="text"
                             placeholder="Search by company name, lead name or URL"
-                            className="flex items-center gap-2 px-3 py-2 text-lg md:text-sm text-text-breadcrumb border border-stroke rounded-lg hover:bg-neutral-50 hover:border-stroke/85 transition-all w-full pl-10 pr-4 placeholder:text-neutral-400"
+                            value={searchQuery}
+                            onChange={(e) => onSearchChange(e.target.value)}
+                            className="flex items-center gap-2 px-3 py-2 text-sm text-text-breadcrumb border border-stroke rounded-lg hover:bg-neutral-50 hover:border-stroke/85 transition-all w-full pl-10 pr-4 placeholder:text-neutral-400"
                         />
                     </div>
                 </div>

@@ -15,6 +15,26 @@ export const leadsColumns = [
         internalDate: 'N/A',
         sentiment: 'POS maybe interested',
         avatars: ['/leads/avatar-1.png', '/leads/avatar-2.png']
+      },
+      {
+        id: '2',
+        name: 'Sarah Johnson',
+        title: 'Marketing Director',
+        company: 'Digital Ventures',
+        chatterDate: '05-03-26',
+        internalDate: '06-03-26',
+        sentiment: 'Neutral',
+        avatars: ['/leads/avatar-3.png']
+      },
+      {
+        id: '3',
+        name: 'Michael Chen',
+        title: 'VP of Sales',
+        company: 'Growth Solutions',
+        chatterDate: '04-03-26',
+        internalDate: '05-03-26',
+        sentiment: 'POS interested',
+        avatars: ['/leads/avatar-1.png', '/leads/avatar-2.png']
       }
     ]
   },
