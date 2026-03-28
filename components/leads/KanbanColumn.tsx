@@ -14,13 +14,13 @@ interface KanbanColumnProps {
     isVertical?: boolean;
 }
 
-const KanbanColumn: React.FC<KanbanColumnProps> = ({ 
+const KanbanColumn: React.FC<KanbanColumnProps> = ({
     id,
-    title, 
-    count, 
-    color = 'bg-neutral-100', 
+    title,
+    count,
+    color = 'bg-neutral-100',
     cards = [],
-    isVertical = false 
+    isVertical = false
 }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -46,9 +46,9 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                         <span className={`px-2 py-1 ${color} text-neutral-700 text-xs font-semibold rounded-full`}>
                             {count}
                         </span>
-                        <h3 
+                        <h3
                             className="text-sm font-medium text-text-heading whitespace-nowrap"
-                            style={{ 
+                            style={{
                                 writingMode: 'vertical-rl',
                                 textOrientation: 'mixed'
                             }}
@@ -57,7 +57,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                             {getTruncatedTitle(title, 15)}
                         </h3>
                     </div>
-                    
+
                     {/* Bottom: Expand Icon */}
                     <div className="pb-4">
                         <button
@@ -102,11 +102,10 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                 </div>
 
                 {/* Column Content - DROPPABLE */}
-                <div 
+                <div
                     ref={setNodeRef}
-                    className={`space-y-3 overflow-y-auto min-h-[200px] animate-fade-in transition-colors rounded-lg p-2 ${
-                        isOver ? 'bg-blue-50 border-2 border-dashed border-blue-300' : ''
-                    }`}
+                    className={`space-y-3 overflow-y-auto min-h-[300px] animate-fade-in transition-colors rounded-lg p-2 ${isOver ? 'bg-blue-50 border-2 border-dashed border-blue-300' : ''
+                        }`}
                     style={{ animationDuration: '500ms', animationDelay: '200ms' }}
                 >
                     {cards.length > 0 ? (
@@ -136,9 +135,9 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                     <span className={`px-2 py-1 ${color} text-neutral-700 text-xs font-semibold rounded-full`}>
                         {count}
                     </span>
-                    <h3 
+                    <h3
                         className="text-sm font-medium text-text-heading whitespace-nowrap"
-                        style={{ 
+                        style={{
                             writingMode: 'vertical-rl',
                             textOrientation: 'mixed'
                         }}
@@ -147,7 +146,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                         {getTruncatedTitle(title, 15)}
                     </h3>
                 </div>
-                
+
                 {/* Bottom: Expand Icon */}
                 <div className="pb-4">
                     <button
@@ -188,7 +187,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                     </button>
 
                     {/* Menu Button */}
-                    <button 
+                    <button
                         className="cursor-pointer hover:bg-neutral-100 p-1 rounded-lg transition-all"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -198,11 +197,10 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
             </div>
 
             {/* Column Content - DROPPABLE with staggered fade in */}
-            <div 
+            <div
                 ref={setNodeRef}
-                className={`space-y-3 overflow-y-auto min-h-[200px] animate-fade-in transition-colors rounded-lg p-2 ${
-                    isOver ? 'bg-blue-50 border-2 border-dashed border-blue-300' : ''
-                }`}
+                className={`space-y-3 overflow-y-auto min-h-[300px] animate-fade-in transition-colors rounded-lg p-2 ${isOver ? 'bg-blue-50 border-2 border-dashed border-blue-300' : ''
+                    }`}
                 style={{ animationDuration: '500ms', animationDelay: '200ms' }}
             >
                 {cards.length > 0 ? (

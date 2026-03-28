@@ -7,6 +7,7 @@ import {
   DragOverlay,
   DragStartEvent,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
@@ -54,6 +55,12 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ searchQuery, selectedSort }) 
       activationConstraint: {
         distance: 8, // 8px of movement required to start drag
       },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250, // 250ms hold for touch devices
+        tolerance: 5,
+      },
     })
   );
 
@@ -76,10 +83,10 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ searchQuery, selectedSort }) 
     const cardId = active.id as string;
 
     // Find the card being dragged
-    const sourceColumn = columns.find(col => 
+    const sourceColumn = columns.find(col =>
       col.cards.some(card => card.id === cardId)
     );
-    
+
     if (sourceColumn) {
       const card = sourceColumn.cards.find(c => c.id === cardId);
       if (card) {
@@ -91,7 +98,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ searchQuery, selectedSort }) 
   // Handle drag end
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    
+
     setActiveCard(null);
 
     if (!over) return;
@@ -100,7 +107,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ searchQuery, selectedSort }) 
     const targetColumnId = over.id as string;
 
     // Find source column
-    const sourceColumn = columns.find(col => 
+    const sourceColumn = columns.find(col =>
       col.cards.some(card => card.id === cardId)
     );
 
@@ -126,7 +133,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ searchQuery, selectedSort }) 
           count: col.cards.filter(c => c.id !== cardId).length
         };
       }
-      
+
       // Add card to target column
       if (col.id === targetColumn.id) {
         return {
@@ -135,7 +142,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ searchQuery, selectedSort }) 
           count: col.cards.length + 1
         };
       }
-      
+
       return col;
     });
 
@@ -204,7 +211,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ searchQuery, selectedSort }) 
                   isVertical={column.isVertical}
                 />
               ))}
-              
+
               <AddLeadPhaseButton onClick={() => setIsModalOpen(true)} />
             </div>
           </div>
@@ -213,7 +220,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ searchQuery, selectedSort }) 
         {/* Drag Overlay - Shows card being dragged */}
         <DragOverlay>
           {activeCard ? (
-            <div className="opacity-80 rotate-3 scale-105">
+            <div className="opacity-90 rotate-2 scale-105 cursor-grabbing shadow-2xl">
               <LeadCard {...activeCard} />
             </div>
           ) : null}

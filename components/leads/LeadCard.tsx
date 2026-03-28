@@ -39,6 +39,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         opacity: isDragging ? 0.5 : 1,
         cursor: isDragging ? 'grabbing' : 'grab',
         animationDelay: `${index * 50}ms`,
+        transition: 'transform 200ms ease, opacity 200ms ease', // Smooth transition
     };
 
     return (
@@ -114,29 +115,29 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
                 {/* Action Icons */}
                 <div className="flex items-center gap-1.5">
-                    <button 
-                        className='cursor-pointer text-icon-linkedin' 
+                    <button
+                        className='cursor-pointer text-icon-linkedin'
                         title="View details"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <SidebarLeftIcon size={20} />
                     </button>
-                    <button 
-                        className='cursor-pointer text-icon-linkedin' 
+                    <button
+                        className='cursor-pointer text-icon-linkedin'
                         title="Edit"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <PencilEditIcon size={20} />
                     </button>
-                    <button 
-                        className='cursor-pointer text-icon-linkedin' 
+                    <button
+                        className='cursor-pointer text-icon-linkedin'
                         title="Message"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <CardCounterIcon size={20} />
                     </button>
-                    <button 
-                        className='cursor-pointer text-icon-linkedin' 
+                    <button
+                        className='cursor-pointer text-icon-linkedin'
                         title="Notes"
                         onClick={(e) => e.stopPropagation()}
                     >
