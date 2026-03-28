@@ -1,10 +1,13 @@
 'use client';
 
 import React from 'react';
+import { useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 import { CardCounterIcon, LinkedinIcon, PencilEditIcon, SidebarLeftIcon, TimeLineListIcon } from '../Icons';
 import Image from 'next/image';
 
 interface LeadCardProps {
+    id: string;
     name: string;
     title: string;
     company: string;
@@ -16,6 +19,7 @@ interface LeadCardProps {
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({
+    id,
     name,
     title,
     company,
@@ -25,10 +29,25 @@ const LeadCard: React.FC<LeadCardProps> = ({
     avatars = [],
     index = 0
 }) => {
+    // Make this card draggable
+    const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+        id: id,
+    });
+
+    const style = {
+        transform: CSS.Translate.toString(transform),
+        opacity: isDragging ? 0.5 : 1,
+        cursor: isDragging ? 'grabbing' : 'grab',
+        animationDelay: `${index * 50}ms`,
+    };
+
     return (
         <div
-            className="bg-card-bg rounded-lg border-none transition-all duration-200 cursor-pointer animate-fade-in"
-            style={{ animationDelay: `${index * 50}ms` }}
+            ref={setNodeRef}
+            style={style}
+            {...listeners}
+            {...attributes}
+            className="bg-card-bg rounded-lg border-none transition-all duration-200 hover:shadow-md animate-fade-in"
         >
             {/* Header: Name + LinkedIn */}
             <div className='px-5 pt-6'>
@@ -39,7 +58,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                             <LinkedinIcon size={12} />
                         </h4>
                         <div className='mt-1.5 text-xs text-text w-3/4'>
-                            <p >{title} at <span className="font-medium">{company}</span></p>
+                            <p>{title} at <span className="font-medium">{company}</span></p>
                         </div>
                     </div>
                 </div>
@@ -48,12 +67,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     <div className="space-y-1 text-xs text-text pt-3.5 py-2.5">
                         {chatterDate && (
                             <p>
-                                Chatter task date: <span >{chatterDate}</span>
+                                Chatter task date: <span>{chatterDate}</span>
                             </p>
                         )}
                         {internalDate && (
                             <p>
-                                Internal task date: <span >{internalDate}</span>
+                                Internal task date: <span>{internalDate}</span>
                             </p>
                         )}
                     </div>
@@ -95,16 +114,32 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
                 {/* Action Icons */}
                 <div className="flex items-center gap-1.5">
-                    <button className='cursor-pointer text-icon-linkedin' title="View details">
+                    <button 
+                        className='cursor-pointer text-icon-linkedin' 
+                        title="View details"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <SidebarLeftIcon size={20} />
                     </button>
-                    <button className='cursor-pointer text-icon-linkedin' title="Edit">
+                    <button 
+                        className='cursor-pointer text-icon-linkedin' 
+                        title="Edit"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <PencilEditIcon size={20} />
                     </button>
-                    <button className='cursor-pointer text-icon-linkedin' title="Message">
+                    <button 
+                        className='cursor-pointer text-icon-linkedin' 
+                        title="Message"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <CardCounterIcon size={20} />
                     </button>
-                    <button className='cursor-pointer text-icon-linkedin' title="Notes">
+                    <button 
+                        className='cursor-pointer text-icon-linkedin' 
+                        title="Notes"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <TimeLineListIcon size={20} />
                     </button>
                 </div>

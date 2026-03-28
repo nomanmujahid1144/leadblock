@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useDroppable } from '@dnd-kit/core';
 import LeadCard from './LeadCard';
 import { DoubleArrowIcon, ViewMoreIcon } from '../Icons';
 
 interface KanbanColumnProps {
+    id: string;
     title: string;
     count: number;
     color?: string;
@@ -13,6 +15,7 @@ interface KanbanColumnProps {
 }
 
 const KanbanColumn: React.FC<KanbanColumnProps> = ({ 
+    id,
     title, 
     count, 
     color = 'bg-neutral-100', 
@@ -20,6 +23,11 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
     isVertical = false 
 }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
+
+    // Make this column a drop zone
+    const { setNodeRef, isOver } = useDroppable({
+        id: id,
+    });
 
     // Helper function to truncate title for vertical display
     const getTruncatedTitle = (text: string, maxLength: number = 20) => {
@@ -80,21 +88,27 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                         {/* Collapse Button */}
                         <button
                             onClick={() => setIsCollapsed(true)}
-                            className="cursor-pointer hover:bg-neutral-100 p-1 rounded transition-all"
+                            className="cursor-pointer hover:bg-neutral-100 p-1 rounded-lg transition-all"
                             aria-label="Collapse column"
                         >
                             <DoubleArrowIcon size={22} isCollapsed={false} />
                         </button>
 
                         {/* Menu Button */}
-                        <button className="cursor-pointer hover:bg-neutral-100 p-1 rounded transition-all">
+                        <button className="cursor-pointer hover:bg-neutral-100 p-1 rounded-lg transition-all">
                             <ViewMoreIcon size={22} />
                         </button>
                     </div>
                 </div>
 
-                {/* Column Content */}
-                <div className="space-y-3 overflow-y-auto animate-fade-in" style={{ animationDuration: '500ms', animationDelay: '200ms' }}>
+                {/* Column Content - DROPPABLE */}
+                <div 
+                    ref={setNodeRef}
+                    className={`space-y-3 overflow-y-auto min-h-[200px] animate-fade-in transition-colors rounded-lg p-2 ${
+                        isOver ? 'bg-blue-50 border-2 border-dashed border-blue-300' : ''
+                    }`}
+                    style={{ animationDuration: '500ms', animationDelay: '200ms' }}
+                >
                     {cards.length > 0 ? (
                         cards.map((card, index) => (
                             <LeadCard key={card.id} {...card} index={index} />
@@ -167,7 +181,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                             e.stopPropagation();
                             setIsCollapsed(true);
                         }}
-                        className="cursor-pointer hover:bg-neutral-100 p-1 rounded transition-all"
+                        className="cursor-pointer hover:bg-neutral-100 p-1 rounded-lg transition-all"
                         aria-label="Collapse column"
                     >
                         <DoubleArrowIcon size={22} isCollapsed={false} />
@@ -175,7 +189,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
 
                     {/* Menu Button */}
                     <button 
-                        className="cursor-pointer hover:bg-neutral-100 p-1 rounded transition-all"
+                        className="cursor-pointer hover:bg-neutral-100 p-1 rounded-lg transition-all"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <ViewMoreIcon size={22} />
@@ -183,8 +197,14 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                 </div>
             </div>
 
-            {/* Column Content - with staggered fade in */}
-            <div className="space-y-3 overflow-y-auto animate-fade-in" style={{ animationDuration: '500ms', animationDelay: '200ms' }}>
+            {/* Column Content - DROPPABLE with staggered fade in */}
+            <div 
+                ref={setNodeRef}
+                className={`space-y-3 overflow-y-auto min-h-[200px] animate-fade-in transition-colors rounded-lg p-2 ${
+                    isOver ? 'bg-blue-50 border-2 border-dashed border-blue-300' : ''
+                }`}
+                style={{ animationDuration: '500ms', animationDelay: '200ms' }}
+            >
                 {cards.length > 0 ? (
                     cards.map((card, index) => (
                         <LeadCard key={card.id} {...card} index={index} />
