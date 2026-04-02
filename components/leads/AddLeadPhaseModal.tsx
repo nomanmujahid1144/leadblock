@@ -9,14 +9,14 @@ interface AddLeadPhaseModalProps {
 }
 
 const COLORS = [
-    { id: 1, hex: '#FFECB6', bg: 'bg-[#FFECB6]' },
-    { id: 2, hex: '#D0C8FF', bg: 'bg-[#D0C8FF]' },
-    { id: 3, hex: '#FFD9EC', bg: 'bg-[#FFD9EC]' },
-    { id: 4, hex: '#DCFFD2', bg: 'bg-[#DCFFD2]' },
-    { id: 5, hex: '#ECE1FF', bg: 'bg-[#ECE1FF]' },
-    { id: 6, hex: '#D5E6FF', bg: 'bg-[#D5E6FF]' },
-    { id: 7, hex: '#FAF5B3', bg: 'bg-[#FAF5B3]' },
-    { id: 8, hex: '#BFFFF9', bg: 'bg-[#BFFFF9]' },
+    { id: 1, hex: '#FFECB6', name: 'phase-yellow' },
+    { id: 2, hex: '#D0C8FF', name: 'phase-purple' },
+    { id: 3, hex: '#FFD9EC', name: 'phase-pink' },
+    { id: 4, hex: '#DCFFD2', name: 'phase-green' },
+    { id: 5, hex: '#ECE1FF', name: 'phase-lavender' },
+    { id: 6, hex: '#D5E6FF', name: 'phase-blue' },
+    { id: 7, hex: '#FAF5B3', name: 'phase-light-yellow' },
+    { id: 8, hex: '#BFFFF9', name: 'phase-cyan' },
 ];
 
 const AddLeadPhaseModal: React.FC<AddLeadPhaseModalProps> = ({ isOpen, onClose, onSubmit }) => {
@@ -74,7 +74,7 @@ const AddLeadPhaseModal: React.FC<AddLeadPhaseModalProps> = ({ isOpen, onClose, 
                             placeholder="e.g. In progress"
                             value={phaseName}
                             onChange={(e) => setPhaseName(e.target.value)}
-                            className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-sm text-text-heading placeholder:text-neutral-400 transition-all"
+                            className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-sm text-text-heading placeholder:text-neutral-400 transition-all focus:outline-none focus:ring-2 focus:ring-primary-button"
                         />
                     </div>
 
@@ -88,11 +88,13 @@ const AddLeadPhaseModal: React.FC<AddLeadPhaseModalProps> = ({ isOpen, onClose, 
                                 <button
                                     key={color.id}
                                     onClick={() => setSelectedColor(color.hex)}
-                                    className={`w-8 h-8 rounded-full transition-all ${color.bg} ${selectedColor === color.hex
-                                            ? 'ring ring-black scale-110'
+                                    style={{ backgroundColor: color.hex }}
+                                    className={`w-7 h-7 rounded-full transition-all ${
+                                        selectedColor === color.hex
+                                            ? 'ring-2 ring-black ring-offset-2 scale-110'
                                             : 'hover:scale-105'
-                                        }`}
-                                    aria-label={`Select color ${color.hex}`}
+                                    }`}
+                                    aria-label={`Select ${color.name} color`}
                                 />
                             ))}
                         </div>
@@ -103,7 +105,7 @@ const AddLeadPhaseModal: React.FC<AddLeadPhaseModalProps> = ({ isOpen, onClose, 
                         <p className="text-xs text-neutral-500 mb-2">Preview</p>
                         <div className="flex items-center gap-2">
                             <span
-                                className="px-3 py-1 text-xs font-semibold rounded-full text-neutral-700"
+                                className="px-3 py-1.5 text-xs font-semibold rounded-full text-neutral-700"
                                 style={{ backgroundColor: selectedColor }}
                             >
                                 {phaseName || 'Phase name'}
@@ -122,7 +124,7 @@ const AddLeadPhaseModal: React.FC<AddLeadPhaseModalProps> = ({ isOpen, onClose, 
                         <button
                             onClick={handleSubmit}
                             disabled={!phaseName.trim()}
-                            className="px-6 py-2.5 bg-primary-button text-white text-sm font-medium rounded-lg hover:enabled:bg-primary-button/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-6 py-2.5 bg-primary-button text-white text-sm font-medium rounded-lg hover:enabled:bg-primary-button/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Create lead phase
                         </button>

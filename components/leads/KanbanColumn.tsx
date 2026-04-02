@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import LeadCard from './LeadCard';
-import { DoubleArrowIcon, ViewMoreIcon } from '../Icons';
+import { DoubleArrowIcon, DotsHorizontalViewMoreIcon } from '../Icons';
 
 interface KanbanColumnProps {
     id: string;
@@ -12,6 +12,8 @@ interface KanbanColumnProps {
     color?: string;
     cards?: any[];
     isVertical?: boolean;
+    allColumns?: { id: string; title: string }[];
+    onMoveCard?: (cardId: string, targetColumnId: string) => void;
 }
 
 const KanbanColumn: React.FC<KanbanColumnProps> = ({
@@ -20,7 +22,9 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
     count,
     color = 'bg-neutral-100',
     cards = [],
-    isVertical = false
+    isVertical = false,
+    allColumns = [],
+    onMoveCard
 }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -96,7 +100,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
 
                         {/* Menu Button */}
                         <button className="cursor-pointer hover:bg-neutral-100 p-1 rounded-lg transition-all">
-                            <ViewMoreIcon size={22} />
+                            <DotsHorizontalViewMoreIcon size={22} />
                         </button>
                     </div>
                 </div>
@@ -110,7 +114,14 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                 >
                     {cards.length > 0 ? (
                         cards.map((card, index) => (
-                            <LeadCard key={card.id} {...card} index={index} />
+                            <LeadCard
+                                key={card.id}
+                                {...card}
+                                index={index}
+                                currentColumnId={id}
+                                allColumns={allColumns}
+                                onMove={onMoveCard}
+                            />
                         ))
                     ) : (
                         <div className="text-center py-20 bg-card-bg rounded-lg border-none">
@@ -191,7 +202,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                         className="cursor-pointer hover:bg-neutral-100 p-1 rounded-lg transition-all"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <ViewMoreIcon size={22} />
+                        <DotsHorizontalViewMoreIcon size={22} />
                     </button>
                 </div>
             </div>
@@ -205,7 +216,14 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
             >
                 {cards.length > 0 ? (
                     cards.map((card, index) => (
-                        <LeadCard key={card.id} {...card} index={index} />
+                        <LeadCard
+                            key={card.id}
+                            {...card}
+                            index={index}
+                            currentColumnId={id}
+                            allColumns={allColumns}
+                            onMove={onMoveCard}
+                        />
                     ))
                 ) : (
                     <div className="text-center py-12 bg-card-bg">

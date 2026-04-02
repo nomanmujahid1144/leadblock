@@ -7,13 +7,17 @@ import {
   DragOverlay,
   DragStartEvent,
   PointerSensor,
-  TouchSensor,
   useSensor,
   useSensors,
+  closestCorners,
 } from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable';
 import KanbanColumn from './KanbanColumn';
 import AddLeadPhaseButton from './AddLeadPhaseButton';
-import AddLeadPhaseModal from './AddLeadPhaseModal';
 import LeadCard from './LeadCard';
 
 interface Card {
@@ -36,46 +40,31 @@ interface Column {
   cards: Card[];
 }
 
-// Import initial data
-import { leadsColumns as initialColumns } from '@/data/leads/mockData';
-
 interface KanbanBoardProps {
   searchQuery: string;
   selectedSort: string;
+  columns: Column[];
+  setColumns: (columns: Column[]) => void;
+  onAddPhaseClick: () => void;
 }
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ searchQuery, selectedSort }) => {
-  const [columns, setColumns] = useState<Column[]>(initialColumns);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ 
+  searchQuery, 
+  selectedSort, 
+  columns, 
+  setColumns,
+  onAddPhaseClick 
+}) => {
   const [activeCard, setActiveCard] = useState<Card | null>(null);
 
-  // Setup sensors for drag and drop
+  // Setup sensors - DESKTOP ONLY (no touch for mobile)
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // 8px of movement required to start drag
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 250, // 250ms hold for touch devices
-        tolerance: 5,
+        distance: 8,
       },
     })
   );
-
-  const handleAddPhase = (name: string, colorHex: string) => {
-    const newColumn: Column = {
-      id: `custom-${Date.now()}`,
-      title: name,
-      count: 0,
-      color: `bg-[${colorHex}]`,
-      isVertical: true,
-      cards: []
-    };
-
-    setColumns([...columns, newColumn]);
-  };
 
   // Handle drag start
   const handleDragStart = (event: DragStartEvent) => {
@@ -83,14 +72,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ searchQuery, selectedSort }) 
     const cardId = active.id as string;
 
     // Find the card being dragged
-    const sourceColumn = columns.find(col =>
-      col.cards.some(card => card.id === cardId)
-    );
-
-    if (sourceColumn) {
-      const card = sourceColumn.cards.find(c => c.id === cardId);
+    for (const column of columns) {
+      const card = column.cards.find(c => c.id === cardId);
       if (card) {
         setActiveCard(card);
+        break;
       }
     }
   };
@@ -98,43 +84,104 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ searchQuery, selectedSort }) 
   // Handle drag end
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-
+    
     setActiveCard(null);
 
     if (!over) return;
 
     const cardId = active.id as string;
-    const targetColumnId = over.id as string;
+    const overId = over.id as string;
 
     // Find source column
-    const sourceColumn = columns.find(col =>
-      col.cards.some(card => card.id === cardId)
-    );
+    let sourceColumn: Column | undefined;
+    let sourceCard: Card | undefined;
 
-    // Find target column
+    for (const col of columns) {
+      const card = col.cards.find(c => c.id === cardId);
+      if (card) {
+        sourceColumn = col;
+        sourceCard = card;
+        break;
+      }
+    }
+
+    if (!sourceColumn || !sourceCard) return;
+
+    // Determine target
+    const targetColumn = columns.find(col => col.id === overId) || 
+                        columns.find(col => col.cards.some(c => c.id === overId));
+    
+    if (!targetColumn) return;
+
+    // Same column - reorder
+    if (sourceColumn.id === targetColumn.id) {
+      const oldIndex = sourceColumn.cards.findIndex(c => c.id === cardId);
+      const newIndex = targetColumn.cards.findIndex(c => c.id === overId);
+
+      if (oldIndex === newIndex) return;
+
+      setColumns(columns.map(col => {
+        if (col.id === sourceColumn.id) {
+          return {
+            ...col,
+            cards: arrayMove(col.cards, oldIndex, newIndex >= 0 ? newIndex : col.cards.length)
+          };
+        }
+        return col;
+      }));
+    } else {
+      // Different column - move
+      const targetIndex = targetColumn.cards.findIndex(c => c.id === overId);
+
+      setColumns(columns.map(col => {
+        if (col.id === sourceColumn.id) {
+          return {
+            ...col,
+            cards: col.cards.filter(c => c.id !== cardId),
+            count: col.cards.length - 1
+          };
+        }
+        if (col.id === targetColumn.id) {
+          const newCards = [...col.cards];
+          newCards.splice(targetIndex >= 0 ? targetIndex : newCards.length, 0, sourceCard);
+          return {
+            ...col,
+            cards: newCards,
+            count: newCards.length
+          };
+        }
+        return col;
+      }));
+    }
+  };
+
+  // Handle move from dropdown (mobile)
+  const handleMoveCard = (cardId: string, targetColumnId: string) => {
+    let sourceColumn: Column | undefined;
+    let card: Card | undefined;
+
+    for (const col of columns) {
+      const foundCard = col.cards.find(c => c.id === cardId);
+      if (foundCard) {
+        sourceColumn = col;
+        card = foundCard;
+        break;
+      }
+    }
+
+    if (!sourceColumn || !card) return;
+
     const targetColumn = columns.find(col => col.id === targetColumnId);
+    if (!targetColumn || sourceColumn.id === targetColumn.id) return;
 
-    if (!sourceColumn || !targetColumn) return;
-
-    // If dropped in the same column, do nothing
-    if (sourceColumn.id === targetColumn.id) return;
-
-    // Find the card
-    const card = sourceColumn.cards.find(c => c.id === cardId);
-    if (!card) return;
-
-    // Create new columns array with updated cards
-    const newColumns = columns.map(col => {
-      // Remove card from source column
+    setColumns(columns.map(col => {
       if (col.id === sourceColumn.id) {
         return {
           ...col,
           cards: col.cards.filter(c => c.id !== cardId),
-          count: col.cards.filter(c => c.id !== cardId).length
+          count: col.cards.length - 1
         };
       }
-
-      // Add card to target column
       if (col.id === targetColumn.id) {
         return {
           ...col,
@@ -142,98 +189,86 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ searchQuery, selectedSort }) 
           count: col.cards.length + 1
         };
       }
-
       return col;
-    });
-
-    setColumns(newColumns);
+    }));
   };
 
-  // Filter and sort columns
-  const filteredColumns = useMemo(() => {
+  // Filter and sort
+  const processedColumns = useMemo(() => {
     return columns.map(column => {
-      // Filter cards based on search query
-      const filteredCards = column.cards.filter(card => {
-        const searchLower = searchQuery.toLowerCase();
+      let cards = column.cards.filter(card => {
+        if (!searchQuery) return true;
+        const search = searchQuery.toLowerCase();
         return (
-          card.name.toLowerCase().includes(searchLower) ||
-          card.company.toLowerCase().includes(searchLower) ||
-          card.title.toLowerCase().includes(searchLower)
+          card.name.toLowerCase().includes(search) ||
+          card.company.toLowerCase().includes(search) ||
+          card.title.toLowerCase().includes(search)
         );
       });
 
-      // Sort cards based on selectedSort
-      const sortedCards = [...filteredCards].sort((a, b) => {
-        switch (selectedSort) {
-          case 'name':
-            return a.name.localeCompare(b.name);
-          case 'company':
-            return a.company.localeCompare(b.company);
-          case 'sentiment':
-            return a.sentiment.localeCompare(b.sentiment);
-          case 'date':
-            // Sort by chatterDate or internalDate (newest first)
-            const dateA = new Date(a.chatterDate || a.internalDate || 0);
-            const dateB = new Date(b.chatterDate || b.internalDate || 0);
-            return dateB.getTime() - dateA.getTime();
-          default:
-            return 0;
-        }
-      });
+      if (selectedSort && selectedSort !== 'none') {
+        cards = [...cards].sort((a, b) => {
+          switch (selectedSort) {
+            case 'name': return a.name.localeCompare(b.name);
+            case 'company': return a.company.localeCompare(b.company);
+            case 'sentiment': return a.sentiment.localeCompare(b.sentiment);
+            case 'date':
+              const dateA = new Date(a.chatterDate || a.internalDate || 0).getTime();
+              const dateB = new Date(b.chatterDate || b.internalDate || 0).getTime();
+              return dateB - dateA;
+            default: return 0;
+          }
+        });
+      }
 
-      return {
-        ...column,
-        cards: sortedCards,
-        count: sortedCards.length
-      };
+      return { ...column, cards, count: cards.length };
     });
   }, [columns, searchQuery, selectedSort]);
 
+  const columnsForDropdown = columns.map(col => ({ id: col.id, title: col.title }));
+
   return (
-    <>
-      <DndContext
-        sensors={sensors}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-      >
-        <div className="relative">
-          {/* Horizontal Scroll Container */}
-          <div className="overflow-x-auto pb-4">
-            <div className="inline-flex gap-1 min-w-full">
-              {filteredColumns.map((column) => (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCorners}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="relative">
+        <div className="overflow-x-auto pb-4">
+          <div className="inline-flex gap-1 min-w-full">
+            {processedColumns.map((column) => (
+              <SortableContext
+                key={column.id}
+                items={column.cards.map(card => card.id)}
+                strategy={verticalListSortingStrategy}
+              >
                 <KanbanColumn
-                  key={column.id}
                   id={column.id}
                   title={column.title}
                   count={column.count}
                   color={column.color}
                   cards={column.cards}
                   isVertical={column.isVertical}
+                  allColumns={columnsForDropdown}
+                  onMoveCard={handleMoveCard}
                 />
-              ))}
-
-              <AddLeadPhaseButton onClick={() => setIsModalOpen(true)} />
-            </div>
+              </SortableContext>
+            ))}
+            
+            <AddLeadPhaseButton onClick={onAddPhaseClick} />
           </div>
         </div>
+      </div>
 
-        {/* Drag Overlay - Shows card being dragged */}
-        <DragOverlay>
-          {activeCard ? (
-            <div className="opacity-90 rotate-2 scale-105 cursor-grabbing shadow-2xl">
-              <LeadCard {...activeCard} />
-            </div>
-          ) : null}
-        </DragOverlay>
-      </DndContext>
-
-      {/* Add Lead Phase Modal */}
-      <AddLeadPhaseModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleAddPhase}
-      />
-    </>
+      <DragOverlay>
+        {activeCard ? (
+          <div className="opacity-90 rotate-2 scale-105 cursor-grabbing shadow-2xl">
+            <LeadCard {...activeCard} />
+          </div>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   );
 };
 

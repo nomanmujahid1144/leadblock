@@ -1,10 +1,11 @@
 'use client';
 
 import React from 'react';
-import { useDraggable } from '@dnd-kit/core';
+import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { CardCounterIcon, LinkedinIcon, PencilEditIcon, SidebarLeftIcon, TimeLineListIcon } from '../Icons';
 import Image from 'next/image';
+import MoveToDropdown from './MoveToDropdown';
 
 interface LeadCardProps {
     id: string;
@@ -16,6 +17,9 @@ interface LeadCardProps {
     sentiment: string;
     avatars?: string[];
     index?: number;
+    currentColumnId?: string;
+    allColumns?: { id: string; title: string }[];
+    onMove?: (cardId: string, targetColumnId: string) => void;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({
@@ -27,28 +31,42 @@ const LeadCard: React.FC<LeadCardProps> = ({
     internalDate,
     sentiment,
     avatars = [],
-    index = 0
+    index = 0,
+    currentColumnId,
+    allColumns = [],
+    onMove
 }) => {
-    // Make this card draggable
-    const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-        id: id,
-    });
+    // Make this card sortable
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id });
 
     const style = {
-        transform: CSS.Translate.toString(transform),
+        transform: CSS.Transform.toString(transform),
+        transition,
         opacity: isDragging ? 0.5 : 1,
         cursor: isDragging ? 'grabbing' : 'grab',
         animationDelay: `${index * 50}ms`,
-        transition: 'transform 200ms ease, opacity 200ms ease', // Smooth transition
+    };
+
+    const handleMove = (targetColumnId: string) => {
+        if (onMove) {
+            onMove(id, targetColumnId);
+        }
     };
 
     return (
         <div
             ref={setNodeRef}
             style={style}
-            {...listeners}
             {...attributes}
-            className="bg-card-bg rounded-lg border-none transition-all duration-200 hover:shadow-md animate-fade-in"
+            {...listeners}
+            className="bg-card-bg rounded-lg border-none transition-all duration-200 hover:shadow-md animate-fade-in touch-none select-none"
         >
             {/* Header: Name + LinkedIn */}
             <div className='px-5 pt-6'>
@@ -115,29 +133,39 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
                 {/* Action Icons */}
                 <div className="flex items-center gap-1.5">
-                    <button
-                        className='cursor-pointer text-icon-linkedin'
+                    {/* Move to dropdown - Mobile only */}
+                    {currentColumnId && allColumns.length > 0 && onMove && (
+                        <MoveToDropdown
+                            currentColumnId={currentColumnId}
+                            allColumns={allColumns}
+                            onMove={handleMove}
+                        />
+                    )}
+
+                    {/* Desktop action buttons */}
+                    <button 
+                        className='cursor-pointer text-icon-linkedin hidden md:block' 
                         title="View details"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <SidebarLeftIcon size={20} />
                     </button>
-                    <button
-                        className='cursor-pointer text-icon-linkedin'
+                    <button 
+                        className='cursor-pointer text-icon-linkedin hidden md:block' 
                         title="Edit"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <PencilEditIcon size={20} />
                     </button>
-                    <button
-                        className='cursor-pointer text-icon-linkedin'
+                    <button 
+                        className='cursor-pointer text-icon-linkedin hidden md:block' 
                         title="Message"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <CardCounterIcon size={20} />
                     </button>
-                    <button
-                        className='cursor-pointer text-icon-linkedin'
+                    <button 
+                        className='cursor-pointer text-icon-linkedin hidden md:block' 
                         title="Notes"
                         onClick={(e) => e.stopPropagation()}
                     >

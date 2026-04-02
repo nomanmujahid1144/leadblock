@@ -10,13 +10,17 @@ interface LeadsTopBarProps {
     onSearchChange: (query: string) => void;
     selectedSort: string;
     onSortChange: (sort: string) => void;
+    viewMode?: 'grid' | 'list';
+    onViewModeChange?: (mode: 'grid' | 'list') => void;
 }
 
 const LeadsTopBar: React.FC<LeadsTopBarProps> = ({
     searchQuery,
     onSearchChange,
     selectedSort,
-    onSortChange
+    onSortChange,
+    viewMode = 'grid',
+    onViewModeChange
 }) => {
     return (
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 animate-fade-in">
@@ -55,19 +59,35 @@ const LeadsTopBar: React.FC<LeadsTopBarProps> = ({
             </div>
 
             {/* View Toggle */}
-            <div className="flex items-center gap-3">
-                <div className="flex items-center border border-stroke rounded-lg">
-                    {/* List View Button */}
-                    <button className="p-2 rounded-lg hover:bg-neutral-50 transition-colors text-text-heading hover:text-neutral-600">
-                        <ListViewIcon size={22} />
-                    </button>
+            {onViewModeChange && (
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center border border-stroke rounded-lg">
+                        {/* List View Button */}
+                        <button 
+                            onClick={() => onViewModeChange('list')}
+                            className={`p-2 rounded-lg transition-colors ${
+                                viewMode === 'list' 
+                                    ? 'bg-stroke text-primary' 
+                                    : 'hover:bg-neutral-50 text-text-heading hover:text-neutral-600'
+                            }`}
+                        >
+                            <ListViewIcon size={22} className={viewMode === 'list' ? 'text-black' : ''} />
+                        </button>
 
-                    {/* Grid View Button - Active */}
-                    <button className="p-2 rounded-lg bg-stroke text-primary transition-colors">
-                        <GridViewIcon size={22} className='text-black' />
-                    </button>
+                        {/* Grid View Button */}
+                        <button 
+                            onClick={() => onViewModeChange('grid')}
+                            className={`p-2 rounded-lg transition-colors ${
+                                viewMode === 'grid' 
+                                    ? 'bg-stroke text-primary' 
+                                    : 'hover:bg-neutral-50 text-text-heading hover:text-neutral-600'
+                            }`}
+                        >
+                            <GridViewIcon size={22} className={viewMode === 'grid' ? 'text-black' : ''} />
+                        </button>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };

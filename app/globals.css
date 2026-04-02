@@ -2,26 +2,26 @@
 
 @theme {
   --font-sans: 'Work Sans', system-ui, sans-serif;
-  
+
   --color-primary: #E64233;
   --color-primary-light: #FEE2E2;
   --color-primary-dark: #DC2626;
-  
+
   --color-text-*: initial;
   --color-text: #676F7E;
   --color-text-heading: #252B37;
   --color-text-breadcrumb: #878790;
-  
+
   --color-icon-*: initial;
   --color-icon-box: #E8EAED;
   --color-icon-linkedin: #34446F;
-  
+
   --color-info-*: initial;
   --color-info-bg: #FEF3C7;
   --color-info-text: #B45309;
 
   --color-stroke: #DCDFE5;
-  
+
   --color-percentage: #1B7E44;
 
   --color-hero-gradient: #23365C;
@@ -33,7 +33,17 @@
 
   /* Calendar Picker */
   --color-calendar-picker: #2F80ED;
-  
+
+  /* Phase Colors */
+  --color-phase-yellow: #FFECB6;
+  --color-phase-purple: #D0C8FF;
+  --color-phase-pink: #FFD9EC;
+  --color-phase-green: #DCFFD2;
+  --color-phase-lavender: #ECE1FF;
+  --color-phase-blue: #D5E6FF;
+  --color-phase-light-yellow: #FAF5B3;
+  --color-phase-cyan: #BFFFF9;
+
   --color-neutral-*: initial;
   --color-neutral-50: #F9FAFB;
   --color-neutral-100: #F3F4F6;
@@ -59,12 +69,15 @@ body {
   .animate-delay-100 {
     animation-delay: 100ms;
   }
+
   .animate-delay-200 {
     animation-delay: 200ms;
   }
+
   .animate-delay-300 {
     animation-delay: 300ms;
   }
+
   .animate-delay-400 {
     animation-delay: 400ms;
   }
@@ -77,9 +90,11 @@ body {
     opacity: 0;
     transform: translateX(-20px) scaleX(0.95);
   }
+
   60% {
     transform: translateX(5px) scaleX(1.02);
   }
+
   100% {
     opacity: 1;
     transform: translateX(0) scaleX(1);
@@ -95,11 +110,11 @@ body {
   .custom-checkbox {
     @apply appearance-none w-4 h-4 border-2 border-neutral-300 rounded-md bg-white cursor-pointer transition-all relative;
   }
-  
+
   .custom-checkbox:checked {
     @apply bg-icon-linkedin border-icon-linkedin;
   }
-  
+
   .custom-checkbox:checked::after {
     content: '';
     @apply absolute;
@@ -111,11 +126,11 @@ body {
     border-width: 0 2px 2px 0;
     transform: translate(-50%, -50%) rotate(45deg);
   }
-  
+
   .custom-checkbox:hover {
     @apply border-icon-linkedin/50;
   }
-  
+
   .custom-checkbox:focus {
     @apply outline-none ring-2 ring-icon-linkedin/20;
   }

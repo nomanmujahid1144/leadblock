@@ -90,6 +90,13 @@ export const LinkedinIcon: React.FC<IconProps> = ({ className = '', size = 20 })
         <path d="M1.25 5.99998C1.25 3.76081 1.25 2.64122 1.94562 1.9456C2.64124 1.24998 3.76083 1.24998 6 1.24998C8.23915 1.24998 9.35875 1.24998 10.0544 1.9456C10.75 2.64122 10.75 3.76081 10.75 5.99998C10.75 8.23913 10.75 9.35873 10.0544 10.0544C9.35875 10.75 8.23915 10.75 6 10.75C3.76083 10.75 2.64124 10.75 1.94562 10.0544C1.25 9.35873 1.25 8.23913 1.25 5.99998Z" stroke="#34446F" strokeWidth="0.75" strokeLinejoin="round" />
     </svg>
 );
+export const LinkedinBoldIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
+    <svg width={size} height={size} viewBox="0 0 14 14" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M9.3335 4.66667C10.2618 4.66667 11.152 5.03542 11.8084 5.6918C12.4647 6.34818 12.8335 7.23841 12.8335 8.16667V12.25H10.5002V8.16667C10.5002 7.85725 10.3772 7.56051 10.1585 7.34171C9.93966 7.12292 9.64292 7.00001 9.3335 7.00001C9.02408 7.00001 8.72733 7.12292 8.50854 7.34171C8.28975 7.56051 8.16683 7.85725 8.16683 8.16667V12.25H5.8335V8.16667C5.8335 7.23841 6.20225 6.34818 6.85862 5.6918C7.515 5.03542 8.40524 4.66667 9.3335 4.66667Z" stroke="#1A80E6" strokeWidth="1.16667" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M3.49984 5.25H1.1665V12.25H3.49984V5.25Z" stroke="#1A80E6" strokeWidth="1.16667" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M2.33317 3.50001C2.9775 3.50001 3.49984 2.97767 3.49984 2.33334C3.49984 1.68901 2.9775 1.16667 2.33317 1.16667C1.68884 1.16667 1.1665 1.68901 1.1665 2.33334C1.1665 2.97767 1.68884 3.50001 2.33317 3.50001Z" stroke="#1A80E6" strokeWidth="1.16667" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
 export const CalendarIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
     <svg width={size} height={size} viewBox="0 0 12 12" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
         <path d="M4 1V3" stroke="#676F7E" strokeLinecap="round" strokeLinejoin="round" />
@@ -177,11 +184,18 @@ export const SidebarLeftIcon: React.FC<IconProps> = ({ className = '', size = 20
         <path d="M4.1665 5.83331H4.99984M4.1665 8.33331H4.99984" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 );
-export const ViewMoreIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
+export const DotsHorizontalViewMoreIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
     <svg width={size} height={size} viewBox="0 0 21 21" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
         <circle cx="5.5" cy="10.5" r="1.5" fill="#36465F" />
         <circle cx="10.5" cy="10.5" r="1.5" fill="#36465F" />
         <circle cx="15.5" cy="10.5" r="1.5" fill="#36465F" />
+    </svg>
+);
+export const DotsVerticleViewMoreIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
+    <svg width={size} height={size} viewBox="0 0 5 22" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <circle cx="2.2" cy="2.2" r="2.2" transform="matrix(1 0 0 -1 0 4.39999)" fill="#D9D9D9" />
+        <circle cx="2.2" cy="2.2" r="2.2" transform="matrix(1 0 0 -1 0 13.1999)" fill="#D9D9D9" />
+        <circle cx="2.2" cy="2.2" r="2.2" transform="matrix(1 0 0 -1 0 21.9999)" fill="#D9D9D9" />
     </svg>
 );
 export const DoubleArrowIcon: React.FC<IconProps & { isCollapsed?: boolean }> = ({
