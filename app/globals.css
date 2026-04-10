@@ -28,6 +28,8 @@
 
   --color-card-bg: #f8f8f8;
 
+  /*  */
+
   /* Buttons */
   --color-primary-button: #0B64F4;
 
@@ -39,6 +41,7 @@
   --color-phase-purple: #D0C8FF;
   --color-phase-pink: #FFD9EC;
   --color-phase-green: #DCFFD2;
+  --color-phase-green-dark: #16A249;
   --color-phase-lavender: #ECE1FF;
   --color-phase-blue: #D5E6FF;
   --color-phase-light-yellow: #FAF5B3;

@@ -6,6 +6,7 @@ import ListView from '@/components/leads/ListView';
 import AddLeadPhaseModal from '@/components/leads/AddLeadPhaseModal';
 import dynamic from 'next/dynamic';
 import { leadsColumns as initialLeadsColumns } from '@/data/leads/mockData';
+import LeadProfileModal from '@/components/leads/LeadProfileModal';
 
 // Define Column type to match KanbanBoard
 interface Card {
@@ -40,9 +41,11 @@ const KanbanBoard = dynamic(() => import('@/components/leads/KanbanBoard'), {
 export default function LeadsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSort, setSelectedSort] = useState('none');
+  const [selectedLead, setSelectedLead] = useState<any>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [columns, setColumns] = useState<Column[]>(initialLeadsColumns);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   // Handle add new phase (shared between both views)
   const handleAddPhase = (name: string, colorHex: string) => {
@@ -58,9 +61,19 @@ export default function LeadsPage() {
     setColumns([...columns, newColumn]);
   };
 
+  // Add handler
+  const handleLeadClick = (lead: any) => {
+    setSelectedLead({
+      ...lead,
+      email: `${lead.name.split(' ')[0].toLowerCase()}@${lead.company.toLowerCase().replace(' ', '')}.com`,
+      phone: '(+31) 610887057',
+      crmStatus: 'Not yet'
+    });
+  };
+
   return (
     <div className="min-h-screen px-4 md:px-6 lg:px-8 py-6">
-      <LeadsTopBar 
+      <LeadsTopBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         selectedSort={selectedSort}
@@ -68,9 +81,9 @@ export default function LeadsPage() {
         viewMode={viewMode}
         onViewModeChange={setViewMode}
       />
-      
+
       {viewMode === 'grid' ? (
-        <KanbanBoard 
+        <KanbanBoard
           searchQuery={searchQuery}
           selectedSort={selectedSort}
           columns={columns}
@@ -78,11 +91,12 @@ export default function LeadsPage() {
           onAddPhaseClick={() => setIsModalOpen(true)}
         />
       ) : (
-        <ListView 
+        <ListView
           columns={columns}
           searchQuery={searchQuery}
           selectedSort={selectedSort}
           onAddPhaseClick={() => setIsModalOpen(true)}
+          onLeadClick={handleLeadClick}
         />
       )}
 
@@ -91,6 +105,13 @@ export default function LeadsPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleAddPhase}
+      />
+
+      {/* Add LeadProfileModal at the end: */}
+      <LeadProfileModal
+        isOpen={!!selectedLead}
+        onClose={() => setSelectedLead(null)}
+        lead={selectedLead}
       />
     </div>
   );

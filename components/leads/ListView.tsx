@@ -29,6 +29,7 @@ interface ListViewProps {
     searchQuery: string;
     selectedSort: string;
     onAddPhaseClick: () => void;
+    onLeadClick: (lead: any) => void;
 }
 
 // Helper function to get initials from name
@@ -58,7 +59,7 @@ const getHexColor = (color: string): string => {
     return colorMap[color] || '#F3F4F6';
 };
 
-const ListView: React.FC<ListViewProps> = ({ columns, searchQuery, selectedSort, onAddPhaseClick }) => {
+const ListView: React.FC<ListViewProps> = ({ columns, searchQuery, selectedSort, onAddPhaseClick, onLeadClick }) => {
     // Flatten all cards from all columns
     const allCards = columns.flatMap(column =>
         column.cards.map(card => ({
@@ -114,6 +115,7 @@ const ListView: React.FC<ListViewProps> = ({ columns, searchQuery, selectedSort,
                     sortedCards.map((card) => (
                         <div
                             key={card.id}
+                            onClick={() => onLeadClick(card)}
                             className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-neutral-50 transition-colors cursor-pointer"
                         >
                             {/* Name Column */}
@@ -129,7 +131,7 @@ const ListView: React.FC<ListViewProps> = ({ columns, searchQuery, selectedSort,
                                         <span className="text-sm font-semibold text-icon-linkedin truncate">
                                             {card.name}
                                         </span>
-                                        <LinkedinBoldIcon size={12} className="flex-shrink-0" />
+                                        <LinkedinBoldIcon size={12} className="flex-shrink-0 text-calendar-picker" />
                                     </div>
                                     <p className="text-xs text-neutral-500 truncate">{card.title}</p>
                                 </div>
