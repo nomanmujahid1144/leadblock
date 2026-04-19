@@ -14,6 +14,7 @@ interface KanbanColumnProps {
     isVertical?: boolean;
     allColumns?: { id: string; title: string }[];
     onMoveCard?: (cardId: string, targetColumnId: string) => void;
+    onLeadClick?: (lead: any) => void;
 }
 
 const KanbanColumn: React.FC<KanbanColumnProps> = ({
@@ -24,7 +25,8 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
     cards = [],
     isVertical = false,
     allColumns = [],
-    onMoveCard
+    onMoveCard,
+    onLeadClick
 }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -121,6 +123,8 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                                 currentColumnId={id}
                                 allColumns={allColumns}
                                 onMove={onMoveCard}
+                                onLeadClick={onLeadClick} // Add this
+                                phaseColor={color} // Add this
                             />
                         ))
                     ) : (
@@ -223,6 +227,8 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                             currentColumnId={id}
                             allColumns={allColumns}
                             onMove={onMoveCard}
+                            onLeadClick={onLeadClick} // Add this
+                            phaseColor={color} // Add this
                         />
                     ))
                 ) : (

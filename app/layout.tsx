@@ -5,6 +5,7 @@ import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import { useState } from "react";
+import { Toaster } from 'sonner';
 
 const workSans = Work_Sans({
   variable: "--font-work-sans",
@@ -23,8 +24,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${workSans.variable} font-sans antialiased`}>
         <Header onMenuClick={() => setIsMobileOpen(!isMobileOpen)} />
-        <Sidebar 
-          isCollapsed={isCollapsed} 
+        <Sidebar
+          isCollapsed={isCollapsed}
           setIsCollapsed={setIsCollapsed}
           isMobileOpen={isMobileOpen}
           setIsMobileOpen={setIsMobileOpen}
@@ -36,6 +37,10 @@ export default function RootLayout({
         >
           {children}
         </main>
+
+        {/* Sonner Toaster */}
+        <Toaster position="top-right" richColors/>
+        
       </body>
     </html>
   );

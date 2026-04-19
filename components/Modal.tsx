@@ -10,6 +10,7 @@ interface ModalProps {
     maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'full';
     showCloseButton?: boolean;
     closeOnBackdropClick?: boolean;
+    zIndex?: number; // Add this prop
 }
 
 const Modal: React.FC<ModalProps> = ({ 
@@ -19,7 +20,8 @@ const Modal: React.FC<ModalProps> = ({
     children, 
     maxWidth = 'md',
     showCloseButton = true,
-    closeOnBackdropClick = true
+    closeOnBackdropClick = true,
+    zIndex = 50 // Default z-index
 }) => {
     if (!isOpen) return null;
 
@@ -44,12 +46,16 @@ const Modal: React.FC<ModalProps> = ({
         <>
             {/* Backdrop */}
             <div
-                className="fixed inset-0 bg-black/50 z-50 animate-fade-in"
+                className="fixed inset-0 bg-black/50 animate-fade-in"
+                style={{ zIndex: zIndex }}
                 onClick={handleBackdropClick}
             />
 
             {/* Modal */}
-            <div className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full ${maxWidthClasses[maxWidth]} px-4 animate-scale-in`}>
+            <div 
+                className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full ${maxWidthClasses[maxWidth]} px-4 animate-scale-in`}
+                style={{ zIndex: zIndex + 1 }}
+            >
                 <div className="bg-white rounded-2xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
                     {/* Header */}
                     {(title || showCloseButton) && (
@@ -60,7 +66,7 @@ const Modal: React.FC<ModalProps> = ({
                             {showCloseButton && (
                                 <button
                                     onClick={onClose}
-                                    className="text-neutral-400 hover:text-neutral-600 transition-colors ml-auto z-30"
+                                    className="text-neutral-400 hover:text-neutral-600 transition-colors ml-auto"
                                     aria-label="Close modal"
                                 >
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">

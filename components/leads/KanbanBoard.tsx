@@ -46,14 +46,16 @@ interface KanbanBoardProps {
   columns: Column[];
   setColumns: (columns: Column[]) => void;
   onAddPhaseClick: () => void;
+  onLeadClick: (lead: any) => void;
 }
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ 
-  searchQuery, 
-  selectedSort, 
-  columns, 
+const KanbanBoard: React.FC<KanbanBoardProps> = ({
+  searchQuery,
+  selectedSort,
+  columns,
   setColumns,
-  onAddPhaseClick 
+  onAddPhaseClick,
+  onLeadClick
 }) => {
   const [activeCard, setActiveCard] = useState<Card | null>(null);
 
@@ -84,7 +86,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
   // Handle drag end
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    
+
     setActiveCard(null);
 
     if (!over) return;
@@ -108,9 +110,9 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     if (!sourceColumn || !sourceCard) return;
 
     // Determine target
-    const targetColumn = columns.find(col => col.id === overId) || 
-                        columns.find(col => col.cards.some(c => c.id === overId));
-    
+    const targetColumn = columns.find(col => col.id === overId) ||
+      columns.find(col => col.cards.some(c => c.id === overId));
+
     if (!targetColumn) return;
 
     // Same column - reorder
@@ -252,10 +254,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
                   isVertical={column.isVertical}
                   allColumns={columnsForDropdown}
                   onMoveCard={handleMoveCard}
+                  onLeadClick={onLeadClick}
                 />
               </SortableContext>
             ))}
-            
+
             <AddLeadPhaseButton onClick={onAddPhaseClick} />
           </div>
         </div>

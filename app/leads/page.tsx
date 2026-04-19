@@ -89,6 +89,7 @@ export default function LeadsPage() {
           columns={columns}
           setColumns={setColumns}
           onAddPhaseClick={() => setIsModalOpen(true)}
+          onLeadClick={handleLeadClick}
         />
       ) : (
         <ListView

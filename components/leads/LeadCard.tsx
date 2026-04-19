@@ -20,6 +20,8 @@ interface LeadCardProps {
     currentColumnId?: string;
     allColumns?: { id: string; title: string }[];
     onMove?: (cardId: string, targetColumnId: string) => void;
+    onLeadClick?: (lead: any) => void; // Add this prop
+    phaseColor?: string; // Add this for phase color
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({
@@ -34,7 +36,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
     index = 0,
     currentColumnId,
     allColumns = [],
-    onMove
+    onMove,
+    onLeadClick,
+    phaseColor,
 }) => {
     // Make this card sortable
     const {
@@ -60,13 +64,42 @@ const LeadCard: React.FC<LeadCardProps> = ({
         }
     };
 
+    // Handle card click to open Lead Profile
+    const handleCardClick = (e: React.MouseEvent) => {
+        // Don't open modal if clicking on action buttons or during drag
+        if (isDragging) return;
+        
+        const target = e.target as HTMLElement;
+        if (target.closest('button')) return;
+
+        if (onLeadClick) {
+            const phaseName = allColumns.find(col => col.id === currentColumnId)?.title || '';
+            
+            onLeadClick({
+                id,
+                name,
+                title,
+                company,
+                chatterDate,
+                internalDate,
+                sentiment,
+                phase: phaseName,
+                phaseColor: phaseColor || '',
+                email: `${name.split(' ')[0].toLowerCase()}@${company.toLowerCase().replace(' ', '')}.com`,
+                phone: '(+31) 610887057',
+                crmStatus: 'Not yet'
+            });
+        }
+    };
+
     return (
         <div
             ref={setNodeRef}
             style={style}
             {...attributes}
             {...listeners}
-            className="bg-card-bg rounded-lg border-none transition-all duration-200 hover:shadow-md animate-fade-in touch-none select-none"
+            onClick={handleCardClick} // Add click handler
+            className="bg-card-bg rounded-lg border-none transition-all duration-200 hover:shadow-md animate-fade-in touch-none select-none cursor-pointer"
         >
             {/* Header: Name + LinkedIn */}
             <div className='px-5 pt-6'>
