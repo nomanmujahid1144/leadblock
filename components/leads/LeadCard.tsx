@@ -98,7 +98,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
             style={style}
             {...attributes}
             {...listeners}
-            onClick={handleCardClick} // Add click handler
+            onClick={handleCardClick}
             className="bg-card-bg rounded-lg border-none transition-all duration-200 hover:shadow-md animate-fade-in touch-none select-none cursor-pointer"
         >
             {/* Header: Name + LinkedIn */}

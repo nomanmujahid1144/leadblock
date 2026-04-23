@@ -2,11 +2,13 @@
 
 import React, { useState } from 'react';
 import Modal from '../Modal';
-import { AddNoteIcon, AddTaskIcon, ArrowDownIcon, ArrowRightDirectionIcon, ArrowRightIcon, CalendarIcon, CancelIcon, FileIcon, LinkedinBoldIcon, ListIcon, MailBoxIcon, OpenIcon, PhaseChangeIcon, PhoneIcon, PlusIcon, ReplyIcon, SendCRMIcon, SinglePersonIcon, TickCorrectBoxIcon, ViewConversationIcon } from '../Icons';
+import { AddNoteIcon, AddTaskIcon, ArrowDownIcon, ArrowRightDirectionIcon, CalendarIcon, CancelIcon, FileIcon, LinkedinBoldIcon, MailBoxIcon, OpenIcon, PhaseChangeIcon, PhoneIcon, PlusIcon, ReplyIcon, SendCRMIcon, SinglePersonIcon, TickCorrectBoxIcon, ViewConversationIcon } from '../Icons';
 import LeadPhaseTimelineHeader from './components/LeadPhaseTimelineHeader';
 import ActionsDropdown from '../ActionsDropdown';
 import AddNoteModal from './AddNoteModal';
 import AddTaskModal from './AddTaskModal';
+import LeadPhaseDropdown from './LeadPhaseDropdown';
+import SentimentDropdown from './SentimentDropdown';
 import { toast } from '@/lib/toast';
 
 interface LeadProfileModalProps {
@@ -26,10 +28,32 @@ interface LeadProfileModalProps {
         sentiment: string;
         crmStatus?: string;
     } | null;
+    allPhases: { id: string; title: string; color: string }[];
+    onAddPhaseClick: () => void;
+    onPhaseChange: (leadId: string, newPhase: string, newPhaseColor: string) => void;
+    onSentimentChange: (leadId: string, newSentiment: string) => void;
 }
 
-// Mock timeline data - will be replaced with real data later
-const mockTimelineData = [
+// Timeline item type
+interface TimelineItem {
+    id: string;
+    type: 'linkedin-sent' | 'linkedin-received' | 'phase-change' | 'task-chatter' | 'task-internal' | 'note';
+    date: string;
+    message?: string;
+    oldPhase?: string;
+    newPhase?: string;
+    newPhaseColor?: string;
+    title?: string;
+    description?: string;
+    dueDate?: string;
+    status?: string;
+    author?: string;
+    content?: string;
+    assignedTo?: string;
+}
+
+// Initial mock timeline data
+const initialMockTimelineData: TimelineItem[] = [
     {
         id: '1',
         type: 'linkedin-sent',
@@ -68,12 +92,162 @@ const mockTimelineData = [
     }
 ];
 
-const LeadProfileModal: React.FC<LeadProfileModalProps> = ({ isOpen, onClose, lead }) => {
+const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
+    isOpen,
+    onClose,
+    lead,
+    allPhases,
+    onAddPhaseClick,
+    onPhaseChange,
+    onSentimentChange,
+}) => {
     const [activeTab, setActiveTab] = useState('All');
     const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false);
     const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
+    const [currentPhase, setCurrentPhase] = useState(lead?.phase || '');
+    const [currentPhaseColor, setCurrentPhaseColor] = useState(lead?.phaseColor || '');
+    const [currentSentiment, setCurrentSentiment] = useState(lead?.sentiment || '');
 
+    // Add timeline state
+    const [timelineData, setTimelineData] = useState<TimelineItem[]>(initialMockTimelineData);
+
+    // Track current lead ID to detect when switching between different leads
+    const [currentLeadId, setCurrentLeadId] = React.useState<string | null>(null);
+
+    // Initialize state when lead changes
+    React.useEffect(() => {
+        if (lead) {
+            // Only reset timeline if we're opening a DIFFERENT lead
+            if (lead.id !== currentLeadId) {
+                setTimelineData(initialMockTimelineData);
+                setCurrentLeadId(lead.id);
+            }
+
+            // Always update to match current lead data
+            setCurrentPhase(lead.phase);
+            setCurrentPhaseColor(lead.phaseColor);
+            setCurrentSentiment(lead.sentiment);
+        }
+    }, [lead, currentLeadId]);
+
+    // NOW the early return is safe (after all hooks)
     if (!lead) return null;
+
+    const handlePhaseChange = (newPhase: string, newPhaseColor: string) => {
+        if (!lead) return;
+
+        const oldPhase = currentPhase;
+
+        setCurrentPhase(newPhase);
+        setCurrentPhaseColor(newPhaseColor);
+
+        // Call parent handler to update the lead in columns
+        onPhaseChange(lead.id, newPhase, newPhaseColor);
+
+        // Add phase change to timeline
+        const now = new Date();
+        const formattedDate = `${now.getDate()} ${now.toLocaleString('en-US', { month: 'short' })} ${now.getFullYear()} - ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}`;
+
+        const phaseChangeEntry: TimelineItem = {
+            id: `phase-change-${Date.now()}`,
+            type: 'phase-change',
+            date: formattedDate,
+            oldPhase: oldPhase,
+            newPhase: newPhase,
+            newPhaseColor: newPhaseColor
+        };
+
+        // Add to beginning of timeline - use functional update
+        setTimelineData(prevTimeline => [phaseChangeEntry, ...prevTimeline]);
+
+        // Switch to "All" tab to show the change
+        setActiveTab('All');
+
+        // Show success toast
+        toast.success('Lead phase updated');
+    };
+
+    const handleSentimentChange = (newSentiment: string) => {
+        if (!lead) return;
+
+        const oldSentiment = currentSentiment;
+
+        setCurrentSentiment(newSentiment);
+
+        // Call parent handler to update the lead in columns
+        onSentimentChange(lead.id, newSentiment);
+
+        // Add sentiment change to timeline
+        const now = new Date();
+        const formattedDate = `${now.getDate()} ${now.toLocaleString('en-US', { month: 'short' })} ${now.getFullYear()} - ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}`;
+
+        const sentimentChangeEntry: TimelineItem = {
+            id: `sentiment-change-${Date.now()}`,
+            type: 'note', // Use 'note' type for sentiment changes
+            date: formattedDate,
+            author: 'System',
+            content: `Sentiment changed from "${oldSentiment}" to "${newSentiment}"`
+        };
+
+        // Add to beginning of timeline - use functional update
+        setTimelineData(prevTimeline => [sentimentChangeEntry, ...prevTimeline]);
+
+        // Switch to "All" tab to show the change
+        setActiveTab('All');
+
+        // Show success toast
+        toast.success('Sentiment updated');
+    };
+
+    // Handler for adding a note
+    const handleAddNote = (noteContent: string) => {
+        const now = new Date();
+        const formattedDate = `${now.getDate()} ${now.toLocaleString('en-US', { month: 'short' })} ${now.getFullYear()} - ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}`;
+
+        const newNote: TimelineItem = {
+            id: `note-${Date.now()}`,
+            type: 'note',
+            date: formattedDate,
+            author: 'You', // In real app, this would be current user's name
+            content: noteContent
+        };
+
+        // Add to beginning of timeline (most recent first)
+        setTimelineData([newNote, ...timelineData]);
+
+        // Switch to "All" or "Notes" tab to show the new note
+        if (activeTab !== 'All' && activeTab !== 'Notes') {
+            setActiveTab('All');
+        }
+    };
+
+    // Handler for adding a task
+    const handleAddTask = (task: { title: string; note: string; dueDate: string; assignTo: string }) => {
+        const now = new Date();
+        const formattedDate = `${now.getDate()} ${now.toLocaleString('en-US', { month: 'short' })} ${now.getFullYear()} - ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}`;
+
+        // Determine task type based on assignTo field (simple logic)
+        const taskType = task.assignTo.toLowerCase().includes('chatter') ? 'task-chatter' : 'task-chatter';
+
+        const newTask: TimelineItem = {
+            id: `task-${Date.now()}`,
+            type: taskType,
+            date: formattedDate,
+            title: task.title,
+            description: task.note || undefined,
+            dueDate: task.dueDate || undefined,
+            status: 'open',
+            assignedTo: task.assignTo || undefined
+        };
+
+        // Add to beginning of timeline (most recent first)
+        setTimelineData([newTask, ...timelineData]);
+
+        // Switch to appropriate tab
+        if (activeTab !== 'All' && activeTab !== 'Chatter Tasks') {
+            setActiveTab('All');
+        }
+    };
 
     // Helper function to get initials
     const getInitials = (name: string): string => {
@@ -87,11 +261,12 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({ isOpen, onClose, le
     const tabs = ['All', 'Notes', 'LinkedIn Messages', 'Chatter Tasks', 'Internal Tasks'];
 
     // Filter timeline based on active tab
-    const filteredTimeline = mockTimelineData.filter(item => {
+    const filteredTimeline = timelineData.filter(item => {
         if (activeTab === 'All') return true;
         if (activeTab === 'Notes' && item.type === 'note') return true;
         if (activeTab === 'LinkedIn Messages' && (item.type === 'linkedin-sent' || item.type === 'linkedin-received')) return true;
         if (activeTab === 'Chatter Tasks' && item.type === 'task-chatter') return true;
+        if (activeTab === 'Internal Tasks' && item.type === 'task-internal') return true;
         return false;
     });
 
@@ -163,16 +338,22 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({ isOpen, onClose, le
                     {/* Dropdowns - Lead Phase, Sentiment, CRM */}
                     <div className="flex items-center gap-3 flex-wrap">
                         {/* Lead Phase Dropdown */}
-                        <button className="px-3 py-1.5 border border-primary-button/20 bg-primary-button/20 text-primary-button/50 text-xs font-medium rounded-full flex items-center gap-2 hover:bg-blue-200 transition-colors cursor-pointer">
-                            Leadphase: <span className='text-primary-button'>{lead.phase}</span>
-                            <ArrowDownIcon size={9} />
-                        </button>
+                        <LeadPhaseDropdown
+                            currentPhase={currentPhase}
+                            currentPhaseColor={currentPhaseColor}
+                            allPhases={allPhases}
+                            onPhaseChange={handlePhaseChange}
+                            onAddPhaseClick={() => {
+                                onClose();
+                                onAddPhaseClick();
+                            }}
+                        />
 
                         {/* Sentiment Dropdown */}
-                        <button className="px-3 py-1.5 border border-phase-green-dark/20 bg-phase-green-dark/20 text-phase-green-dark/50 text-xs font-medium rounded-full flex items-center gap-2 hover:bg-green-200 transition-colors cursor-pointer">
-                            Sentiment: <span className='text-phase-green-dark'>{lead.sentiment}</span>
-                            <ArrowDownIcon size={9} />
-                        </button>
+                        <SentimentDropdown
+                            currentSentiment={currentSentiment}
+                            onSentimentChange={handleSentimentChange}
+                        />
 
                         {/* CRM Status */}
                         <span className="px-3 py-1.5 bg-neutral-100 text-neutral-600 text-xs font-medium rounded-full cursor-pointer">
@@ -239,7 +420,7 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({ isOpen, onClose, le
                     </div>
 
                     {/* Timeline Content */}
-                    <div className="space-y-6 pr-2">
+                    <div className="space-y-6 pr-2 max-h-[500px] overflow-y-auto">
                         {filteredTimeline.length > 0 ? (
                             filteredTimeline.map((item, index) => (
                                 <div key={item.id} className="flex gap-4 relative">
@@ -258,7 +439,7 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({ isOpen, onClose, le
                                             <div className="w-9 h-9 rounded-full border-2 border-white/90 bg-icon-linkedin flex items-center justify-center">
                                                 <PhaseChangeIcon size={16} className="text-white" />
                                             </div>
-                                        ) : item.type === 'task-chatter' ? (
+                                        ) : item.type === 'task-chatter' || item.type === 'task-internal' ? (
                                             <div className="w-9 h-9 rounded-full border-2 border-white/90 bg-icon-linkedin flex items-center justify-center">
                                                 <TickCorrectBoxIcon size={16} className="text-white" />
                                             </div>
@@ -329,25 +510,24 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({ isOpen, onClose, le
                                                             {item.oldPhase}
                                                         </span>
                                                         <ArrowRightDirectionIcon className='text-neutral-700' size={10} />
-                                                        {/* Sentiment Dropdown */}
-                                                        <button className="px-3 py-1.5 border border-phase-green-dark/20 bg-phase-green-dark/20 text-phase-green-dark/50 text-xs font-medium rounded-full flex items-center gap-2 hover:bg-green-200 transition-colors cursor-pointer">
+                                                        <button className="px-3 py-1.5 border border-phase-green-dark/20 bg-phase-green-dark/20 text-phase-green-dark/50 text-xs font-medium rounded-full flex items-center gap-2 transition-colors">
                                                             <span className='text-phase-green-dark'>{item.newPhase}</span>
-                                                            <ArrowDownIcon size={9} />
+                                                            {/* <ArrowDownIcon size={9} /> */}
                                                         </button>
                                                     </div>
                                                 </div>
                                             </LeadPhaseTimelineHeader>
                                         )}
 
-                                        {/* Task Chatter */}
-                                        {item.type === 'task-chatter' && (
+                                        {/* Task Chatter or Internal */}
+                                        {(item.type === 'task-chatter' || item.type === 'task-internal') && (
                                             <LeadPhaseTimelineHeader
-                                                title={item.title || ''}
+                                                title={item.title || (item.type === 'task-chatter' ? 'Chatter Task' : 'Internal Task')}
                                                 headerActions={
                                                     <>
                                                         <button className="text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1 cursor-pointer">
                                                             <CancelIcon size={14} />
-                                                            Cancel chatter task
+                                                            Cancel {item.type === 'task-chatter' ? 'chatter' : 'internal'} task
                                                         </button>
                                                         <button className="text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1 cursor-pointer">
                                                             <OpenIcon size={14} />
@@ -357,11 +537,20 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({ isOpen, onClose, le
                                                 }
                                             >
                                                 <div className='px-4 pb-4'>
-                                                    <p className="text-sm text-neutral-600 mb-2">{item.description}</p>
-                                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 text-xs font-medium rounded-full">
-                                                        <CalendarIcon size={12} className='text-red-600' />
-                                                        due: {item.dueDate}
-                                                    </span>
+                                                    {item.description && (
+                                                        <p className="text-sm text-neutral-600 mb-2">{item.description}</p>
+                                                    )}
+                                                    {item.assignedTo && (
+                                                        <p className="text-xs text-neutral-500 mb-2">
+                                                            Assigned to: <span className="font-medium">{item.assignedTo}</span>
+                                                        </p>
+                                                    )}
+                                                    {item.dueDate && (
+                                                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 text-xs font-medium rounded-full">
+                                                            <CalendarIcon size={12} className='text-red-600' />
+                                                            due: {item.dueDate}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </LeadPhaseTimelineHeader>
                                         )}
@@ -394,31 +583,21 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({ isOpen, onClose, le
                         )}
                     </div>
                 </div>
-
-
-
             </Modal>
+
             {/* Add Note Modal */}
             <AddNoteModal
                 isOpen={isAddNoteModalOpen}
                 onClose={() => setIsAddNoteModalOpen(false)}
-                onSubmit={(note) => {
-                    console.log('Note submitted:', note);
-                    // TODO: Add note to timeline
-                    // For now, just log it
-                }}
+                onSubmit={handleAddNote}
             />
 
             {/* Add Task Modal */}
             <AddTaskModal
                 isOpen={isAddTaskModalOpen}
                 onClose={() => setIsAddTaskModalOpen(false)}
-                onSubmit={(task) => {
-                    console.log('Task submitted:', task);
-                    // TODO: Add task to timeline
-                }}
+                onSubmit={handleAddTask}
             />
-
         </>
     );
 };

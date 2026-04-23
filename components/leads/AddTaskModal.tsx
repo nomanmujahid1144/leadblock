@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Modal from '../Modal';
 import { AtRateIcon, CalendarIcon } from '../Icons';
+import { toast } from '@/lib/toast';
 
 interface AddTaskModalProps {
     isOpen: boolean;
@@ -19,6 +20,10 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ isOpen, onClose, onSubmit }
     const handleSubmit = () => {
         if (title.trim()) {
             onSubmit({ title, note, dueDate, assignTo });
+            
+            // Show success toast
+            toast.success('Task created successfully');
+            
             // Reset form
             setTitle('');
             setNote('');

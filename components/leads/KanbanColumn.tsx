@@ -227,8 +227,8 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                             currentColumnId={id}
                             allColumns={allColumns}
                             onMove={onMoveCard}
-                            onLeadClick={onLeadClick} // Add this
-                            phaseColor={color} // Add this
+                            onLeadClick={onLeadClick}
+                            phaseColor={color}
                         />
                     ))
                 ) : (

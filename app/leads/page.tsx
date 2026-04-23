@@ -71,6 +71,96 @@ export default function LeadsPage() {
     });
   };
 
+  // Handler to update lead phase
+  const handlePhaseChange = (leadId: string, newPhase: string, newPhaseColor: string) => {
+    // Find which column the lead is currently in
+    let sourceColumnId = '';
+    let targetColumnId = '';
+    let leadToMove: Card | null = null;
+
+    // Find source column and lead
+    for (const column of columns) {
+      const lead = column.cards.find(card => card.id === leadId);
+      if (lead) {
+        sourceColumnId = column.id;
+        leadToMove = lead;
+        break;
+      }
+    }
+
+    // Find target column by phase name
+    const targetColumn = columns.find(col => col.title === newPhase);
+    if (targetColumn) {
+      targetColumnId = targetColumn.id;
+    }
+
+    if (!leadToMove || !sourceColumnId || !targetColumnId) return;
+
+    // If phase is the same, no need to move
+    if (sourceColumnId === targetColumnId) {
+      // Just update selectedLead to reflect new data
+      if (selectedLead) {
+        setSelectedLead({
+          ...selectedLead,
+          phase: newPhase,
+          phaseColor: newPhaseColor
+        });
+      }
+      return;
+    }
+
+    // Move the lead between columns
+    setColumns(columns.map(col => {
+      if (col.id === sourceColumnId) {
+        // Remove from source
+        return {
+          ...col,
+          cards: col.cards.filter(card => card.id !== leadId),
+          count: col.cards.length - 1
+        };
+      }
+      if (col.id === targetColumnId) {
+        // Add to target
+        return {
+          ...col,
+          cards: [...col.cards, leadToMove],
+          count: col.cards.length + 1
+        };
+      }
+      return col;
+    }));
+
+    // Update selectedLead to reflect new phase
+    if (selectedLead) {
+      setSelectedLead({
+        ...selectedLead,
+        phase: newPhase,
+        phaseColor: newPhaseColor
+      });
+    }
+  };
+
+  // Handler to update lead sentiment
+  const handleSentimentChange = (leadId: string, newSentiment: string) => {
+    // Update the lead's sentiment in columns
+    setColumns(columns.map(col => ({
+      ...col,
+      cards: col.cards.map(card => 
+        card.id === leadId 
+          ? { ...card, sentiment: newSentiment }
+          : card
+      )
+    })));
+
+    // Update selectedLead to reflect new sentiment
+    if (selectedLead) {
+      setSelectedLead({
+        ...selectedLead,
+        sentiment: newSentiment
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen px-4 md:px-6 lg:px-8 py-6">
       <LeadsTopBar
@@ -113,6 +203,17 @@ export default function LeadsPage() {
         isOpen={!!selectedLead}
         onClose={() => setSelectedLead(null)}
         lead={selectedLead}
+        allPhases={columns.map(col => ({
+          id: col.id,
+          title: col.title,
+          color: col.color
+        }))}
+        onAddPhaseClick={() => {
+          setSelectedLead(null); // Close lead profile
+          setIsModalOpen(true); // Open add phase modal
+        }}
+        onPhaseChange={handlePhaseChange}
+        onSentimentChange={handleSentimentChange}
       />
     </div>
   );

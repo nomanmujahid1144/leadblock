@@ -197,6 +197,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
   // Filter and sort
   const processedColumns = useMemo(() => {
+    console.log(columns, 'columns')
     return columns.map(column => {
       let cards = column.cards.filter(card => {
         if (!searchQuery) return true;
