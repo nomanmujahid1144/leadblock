@@ -47,6 +47,15 @@
   --color-phase-light-yellow: #FAF5B3;
   --color-phase-cyan: #BFFFF9;
 
+  /* Sentiment Colors */
+  --color-sentiment-*: initial;
+  --color-sentiment-positive: #DCFFD2;
+  --color-sentiment-positive-dark: #16A249;
+  --color-sentiment-negative: #FBDFDF;
+  --color-sentiment-negative-dark: #DC2626;
+  --color-sentiment-neutral: #EBECF0;
+  --color-sentiment-neutral-dark: #4B5563;
+
   --color-neutral-*: initial;
   --color-neutral-50: #F9FAFB;
   --color-neutral-100: #F3F4F6;
@@ -59,6 +68,9 @@
   --color-neutral-800: #1F2937;
   --color-neutral-900: #111827;
 
+  /* Custom Font Sizes - ADD THIS */
+  --font-size-2xs: 0.625rem; /* 10px */
+  
   --spacing-banner-sm: 160px;
   --spacing-banner-md: 240px;
   --spacing-banner-lg: 280px;
@@ -83,6 +95,12 @@ body {
 
   .animate-delay-400 {
     animation-delay: 400ms;
+  }
+  
+  /* Add custom text size utility - ADD THIS */
+  .text-2xs {
+    font-size: var(--font-size-2xs);
+    line-height: 1rem;
   }
 }
 

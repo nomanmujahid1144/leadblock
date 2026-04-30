@@ -17,6 +17,36 @@ const SENTIMENTS = [
     'POS maybe interested',
 ];
 
+// Helper function to get sentiment color classes
+const getSentimentColors = (sentiment: string) => {
+    if (sentiment.startsWith('POS')) {
+        return {
+            bg: 'bg-sentiment-positive',
+            border: 'border-sentiment-positive-dark/20',
+            text: 'text-sentiment-positive-dark/50',
+            textDark: 'text-sentiment-positive-dark',
+            hover: 'hover:bg-green-200'
+        };
+    } else if (sentiment.startsWith('NEG')) {
+        return {
+            bg: 'bg-sentiment-negative',
+            border: 'border-sentiment-negative-dark/20',
+            text: 'text-sentiment-negative-dark/50',
+            textDark: 'text-sentiment-negative-dark',
+            hover: 'hover:bg-red-200'
+        };
+    } else {
+        // Neutral or Other DMU
+        return {
+            bg: 'bg-sentiment-neutral',
+            border: 'border-sentiment-neutral-dark/20',
+            text: 'text-sentiment-neutral-dark/50',
+            textDark: 'text-sentiment-neutral-dark',
+            hover: 'hover:bg-neutral-300'
+        };
+    }
+};
+
 const SentimentDropdown: React.FC<SentimentDropdownProps> = ({
     currentSentiment,
     onSentimentChange,
@@ -46,14 +76,16 @@ const SentimentDropdown: React.FC<SentimentDropdownProps> = ({
         setIsOpen(false);
     };
 
+    const colors = getSentimentColors(currentSentiment);
+
     return (
         <div className="relative" ref={dropdownRef}>
             {/* Trigger Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="px-3 py-1.5 border border-phase-green-dark/20 bg-phase-green-dark/20 text-phase-green-dark/50 text-xs font-medium rounded-full flex items-center gap-2 hover:bg-green-200 transition-colors cursor-pointer"
+                className={`px-3 py-1.5 border ${colors.border} ${colors.bg} ${colors.text} text-xs font-medium rounded-full flex items-center gap-2 ${colors.hover} transition-colors cursor-pointer`}
             >
-                Sentiment: <span className='text-phase-green-dark'>{currentSentiment}</span>
+                Sentiment: <span className={colors.textDark}>{currentSentiment}</span>
                 <ArrowDownIcon size={9} />
             </button>
 
@@ -67,7 +99,7 @@ const SentimentDropdown: React.FC<SentimentDropdownProps> = ({
                             className={`w-full px-4 py-2 text-xs text-left transition-colors cursor-pointer ${
                                 sentiment === currentSentiment
                                     ? 'font-medium'
-                                    : ''
+                                    : 'hover:bg-neutral-50'
                             }`}
                         >
                             {sentiment}

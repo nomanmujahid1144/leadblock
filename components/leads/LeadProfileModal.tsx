@@ -37,7 +37,7 @@ interface LeadProfileModalProps {
 // Timeline item type
 interface TimelineItem {
     id: string;
-    type: 'linkedin-sent' | 'linkedin-received' | 'phase-change' | 'task-chatter' | 'task-internal' | 'note';
+    type: 'linkedin-sent' | 'linkedin-received' | 'phase-change' | 'task-chatter' | 'task-internal' | 'note' | 'system-update'; // Added system-update
     date: string;
     message?: string;
     oldPhase?: string;
@@ -183,9 +183,9 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
 
         const sentimentChangeEntry: TimelineItem = {
             id: `sentiment-change-${Date.now()}`,
-            type: 'note', // Use 'note' type for sentiment changes
+            type: 'system-update', // Changed from 'note' to 'system-update'
             date: formattedDate,
-            author: 'System',
+            title: 'Sentiment Changed', // Add title
             content: `Sentiment changed from "${oldSentiment}" to "${newSentiment}"`
         };
 
@@ -246,6 +246,22 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
         // Switch to appropriate tab
         if (activeTab !== 'All' && activeTab !== 'Chatter Tasks') {
             setActiveTab('All');
+        }
+    };
+
+    // Handle Cancel Tasks
+    const handleCancelTask = (taskId: string, taskType: string) => {
+        // Show confirmation before deleting
+        const confirmed = window.confirm(
+            `Are you sure you want to cancel this ${taskType === 'task-chatter' ? 'chatter' : 'internal'} task?`
+        );
+
+        if (confirmed) {
+            // Remove task from timeline
+            setTimelineData(prevTimeline => prevTimeline.filter(item => item.id !== taskId));
+
+            // Show success toast
+            toast.success('Task cancelled successfully');
         }
     };
 
@@ -465,11 +481,15 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-6 text-sm font-medium pt-3">
-                                                        <button className="flex items-center gap-2 text-primary-button cursor-pointer">
+                                                        <button
+                                                            onClick={() => toast.info('Opening LinkedIn reply...')}
+                                                            className="flex items-center gap-2 text-primary-button cursor-pointer">
                                                             <ReplyIcon size={16} />
                                                             Reply to LinkedIn
                                                         </button>
-                                                        <button className="flex items-center gap-2 text-neutral-600 hover:underline">
+                                                        <button
+                                                            onClick={() => toast.info('Opening conversation...')}
+                                                            className="flex items-center gap-2 text-neutral-600 hover:underline">
                                                             <ViewConversationIcon size={16} />
                                                             View conversation
                                                         </button>
@@ -488,11 +508,15 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-6 text-sm font-medium pt-3">
-                                                        <button className="flex items-center gap-2 text-primary-button cursor-pointer">
+                                                        <button
+                                                            onClick={() => toast.info('Opening conversation...')}
+                                                            className="flex items-center gap-2 text-primary-button cursor-pointer">
                                                             <ReplyIcon size={16} />
                                                             Reply to LinkedIn
                                                         </button>
-                                                        <button className="flex items-center gap-2 text-neutral-600 hover:underline">
+                                                        <button
+                                                            onClick={() => toast.info('Opening conversation...')}
+                                                            className="flex items-center gap-2 text-neutral-600 hover:underline">
                                                             <ViewConversationIcon size={16} />
                                                             View conversation
                                                         </button>
@@ -525,11 +549,15 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                                 title={item.title || (item.type === 'task-chatter' ? 'Chatter Task' : 'Internal Task')}
                                                 headerActions={
                                                     <>
-                                                        <button className="text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1 cursor-pointer">
+                                                        <button
+                                                            onClick={() => handleCancelTask(item.id, item.type)}
+                                                            className="text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1 cursor-pointer">
                                                             <CancelIcon size={14} />
                                                             Cancel {item.type === 'task-chatter' ? 'chatter' : 'internal'} task
                                                         </button>
-                                                        <button className="text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1 cursor-pointer">
+                                                        <button
+                                                            onClick={() => toast.info('Opening task details...')}
+                                                            className="text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1 cursor-pointer">
                                                             <OpenIcon size={14} />
                                                             Open
                                                         </button>
@@ -555,7 +583,26 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                             </LeadPhaseTimelineHeader>
                                         )}
 
-                                        {/* Note */}
+                                        {/* System Update */}
+                                        {item.type === 'system-update' && (
+                                            <LeadPhaseTimelineHeader
+                                                title={item.title || 'System Update'}
+                                                headerActions={
+                                                    <>
+                                                        <span className="text-xs text-neutral-500 flex items-center gap-1">
+                                                            <SinglePersonIcon size={14} />
+                                                            System
+                                                        </span>
+                                                    </>
+                                                }
+                                            >
+                                                <div className='px-4 pb-4'>
+                                                    <p className="text-sm text-neutral-600 mb-2">{item.content}</p>
+                                                </div>
+                                            </LeadPhaseTimelineHeader>
+                                        )}
+
+                                        {/* Note - ONLY for human-added notes */}
                                         {item.type === 'note' && (
                                             <LeadPhaseTimelineHeader
                                                 title={'Note'}
