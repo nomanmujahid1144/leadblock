@@ -53,10 +53,10 @@ const Modal: React.FC<ModalProps> = ({
 
             {/* Modal */}
             <div 
-                className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full ${maxWidthClasses[maxWidth]} px-4 animate-scale-in`}
+                className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full ${maxWidthClasses[maxWidth]} md:px-4 px-2 animate-scale-in`}
                 style={{ zIndex: zIndex + 1 }}
             >
-                <div className="bg-white rounded-2xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
+                <div className="bg-white rounded-2xl shadow-2xl p-4 md:p-6 max-h-[90vh] overflow-y-auto">
                     {/* Header */}
                     {(title || showCloseButton) && (
                         <div className="flex items-center justify-between mb-6">

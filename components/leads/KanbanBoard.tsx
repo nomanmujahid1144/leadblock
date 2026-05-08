@@ -40,9 +40,21 @@ interface Column {
   cards: Card[];
 }
 
+interface FilterState {
+  lastMessageFrom: string;
+  lastMessageTo: string;
+  internalTaskFrom: string;
+  internalTaskTo: string;
+  company: string;
+  role: string;
+  leadPhases: string[];
+  sentiments: string[];
+}
+
 interface KanbanBoardProps {
   searchQuery: string;
   selectedSort: string;
+  activeFilters: FilterState;
   columns: Column[];
   setColumns: (columns: Column[]) => void;
   onAddPhaseClick: () => void;
@@ -52,6 +64,7 @@ interface KanbanBoardProps {
 const KanbanBoard: React.FC<KanbanBoardProps> = ({
   searchQuery,
   selectedSort,
+  activeFilters,
   columns,
   setColumns,
   onAddPhaseClick,
@@ -73,7 +86,6 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     const { active } = event;
     const cardId = active.id as string;
 
-    // Find the card being dragged
     for (const column of columns) {
       const card = column.cards.find(c => c.id === cardId);
       if (card) {
@@ -94,7 +106,6 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     const cardId = active.id as string;
     const overId = over.id as string;
 
-    // Find source column
     let sourceColumn: Column | undefined;
     let sourceCard: Card | undefined;
 
@@ -109,13 +120,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
     if (!sourceColumn || !sourceCard) return;
 
-    // Determine target
     const targetColumn = columns.find(col => col.id === overId) ||
       columns.find(col => col.cards.some(c => c.id === overId));
 
     if (!targetColumn) return;
 
-    // Same column - reorder
     if (sourceColumn.id === targetColumn.id) {
       const oldIndex = sourceColumn.cards.findIndex(c => c.id === cardId);
       const newIndex = targetColumn.cards.findIndex(c => c.id === overId);
@@ -132,7 +141,6 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
         return col;
       }));
     } else {
-      // Different column - move
       const targetIndex = targetColumn.cards.findIndex(c => c.id === overId);
 
       setColumns(columns.map(col => {
@@ -195,20 +203,86 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     }));
   };
 
+  // Helper function to check if a date is within range
+  const isDateInRange = (dateStr: string | undefined, fromDate: string, toDate: string): boolean => {
+    if (!dateStr || dateStr === 'N/A') return true; // If no date, don't filter out
+    if (!fromDate && !toDate) return true; // If no date range set, don't filter
+
+    try {
+      const date = new Date(dateStr);
+      const from = fromDate ? new Date(fromDate) : null;
+      const to = toDate ? new Date(toDate) : null;
+
+      if (from && date < from) return false;
+      if (to && date > to) return false;
+      return true;
+    } catch {
+      return true; // If date parsing fails, don't filter out
+    }
+  };
+
   // Filter and sort
   const processedColumns = useMemo(() => {
-    console.log(columns, 'columns')
     return columns.map(column => {
       let cards = column.cards.filter(card => {
-        if (!searchQuery) return true;
-        const search = searchQuery.toLowerCase();
-        return (
-          card.name.toLowerCase().includes(search) ||
-          card.company.toLowerCase().includes(search) ||
-          card.title.toLowerCase().includes(search)
-        );
+        // Search filter
+        if (searchQuery) {
+          const search = searchQuery.toLowerCase();
+          const matchesSearch = (
+            card.name.toLowerCase().includes(search) ||
+            card.company.toLowerCase().includes(search) ||
+            card.title.toLowerCase().includes(search)
+          );
+          if (!matchesSearch) return false;
+        }
+
+        // Date filters - Last Message
+        if (activeFilters.lastMessageFrom || activeFilters.lastMessageTo) {
+          if (!isDateInRange(card.chatterDate, activeFilters.lastMessageFrom, activeFilters.lastMessageTo)) {
+            return false;
+          }
+        }
+
+        // Date filters - Internal Task
+        if (activeFilters.internalTaskFrom || activeFilters.internalTaskTo) {
+          if (!isDateInRange(card.internalDate, activeFilters.internalTaskFrom, activeFilters.internalTaskTo)) {
+            return false;
+          }
+        }
+
+        // Company filter
+        if (activeFilters.company) {
+          if (!card.company.toLowerCase().includes(activeFilters.company.toLowerCase())) {
+            return false;
+          }
+        }
+
+        // Role filter
+        if (activeFilters.role) {
+          if (!card.title.toLowerCase().includes(activeFilters.role.toLowerCase())) {
+            return false;
+          }
+        }
+
+        // Lead Phase filter
+        if (activeFilters.leadPhases.length > 0) {
+          if (!activeFilters.leadPhases.includes(column.id)) {
+            return false;
+          }
+        }
+
+        // Sentiment filter
+        if (activeFilters.sentiments.length > 0) {
+          const matchesSentiment = activeFilters.sentiments.some(sentiment => 
+            card.sentiment.toLowerCase().includes(sentiment.toLowerCase())
+          );
+          if (!matchesSentiment) return false;
+        }
+
+        return true;
       });
 
+      // Sort
       if (selectedSort && selectedSort !== 'none') {
         cards = [...cards].sort((a, b) => {
           switch (selectedSort) {
@@ -226,7 +300,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
       return { ...column, cards, count: cards.length };
     });
-  }, [columns, searchQuery, selectedSort]);
+  }, [columns, searchQuery, selectedSort, activeFilters]);
 
   const columnsForDropdown = columns.map(col => ({ id: col.id, title: col.title }));
 

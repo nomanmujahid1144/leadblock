@@ -37,7 +37,7 @@ interface LeadProfileModalProps {
 // Timeline item type
 interface TimelineItem {
     id: string;
-    type: 'linkedin-sent' | 'linkedin-received' | 'phase-change' | 'task-chatter' | 'task-internal' | 'note' | 'system-update'; // Added system-update
+    type: 'linkedin-sent' | 'linkedin-received' | 'phase-change' | 'task-chatter' | 'task-internal' | 'note' | 'system-update';
     date: string;
     message?: string;
     oldPhase?: string;
@@ -183,9 +183,9 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
 
         const sentimentChangeEntry: TimelineItem = {
             id: `sentiment-change-${Date.now()}`,
-            type: 'system-update', // Changed from 'note' to 'system-update'
+            type: 'system-update',
             date: formattedDate,
-            title: 'Sentiment Changed', // Add title
+            title: 'Sentiment Changed',
             content: `Sentiment changed from "${oldSentiment}" to "${newSentiment}"`
         };
 
@@ -208,7 +208,7 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
             id: `note-${Date.now()}`,
             type: 'note',
             date: formattedDate,
-            author: 'You', // In real app, this would be current user's name
+            author: 'You',
             content: noteContent
         };
 
@@ -296,37 +296,37 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                 zIndex={50}
             >
                 {/* Lead Header */}
-                <div className="mb-6 -mt-4 border border-stroke rounded-xl p-5">
+                <div className="mb-6 -mt-4 border border-stroke rounded-xl p-3 md:p-5">
                     {/* Avatar + Name + Title + Company */}
-                    <div className="flex items-start gap-4 mb-4">
+                    <div className="flex flex-col sm:flex-row items-start gap-4 mb-4">
                         {/* Avatar */}
-                        <div className="w-14 h-14 rounded-full bg-primary-button/10 border-2 border-stroke/50 flex items-center justify-center flex-shrink-0">
-                            <span className="text-xl font-semibold text-primary-button">
+                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary-button/10 border-2 border-stroke/50 flex items-center justify-center flex-shrink-0">
+                            <span className="text-lg md:text-xl font-semibold text-primary-button">
                                 {getInitials(lead.name)}
                             </span>
                         </div>
 
                         {/* Name, Title, Company */}
-                        <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                                <h3 className="text-xl font-semibold text-text-heading">{lead.name}</h3>
-                                <LinkedinBoldIcon className='text-calendar-picker' size={16} />
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <h3 className="text-lg md:text-xl font-semibold text-text-heading break-words">{lead.name}</h3>
+                                <LinkedinBoldIcon className='text-calendar-picker flex-shrink-0' size={16} />
                             </div>
-                            <p className="text-sm text-neutral-600">
+                            <p className="text-xs md:text-sm text-neutral-600 break-words">
                                 {lead.title} at <span className="font-medium">{lead.company}</span>
                             </p>
                             {/* Contact Info */}
-                            <div className="flex items-center gap-6 text-sm text-neutral-600 mt-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-xs md:text-sm text-neutral-600 mt-3">
                                 {lead.phone && (
                                     <div className="flex items-center gap-2">
                                         <PhoneIcon size={14} />
-                                        <span>{lead.phone}</span>
+                                        <span className="break-all">{lead.phone}</span>
                                     </div>
                                 )}
                                 {lead.email && (
                                     <div className="flex items-center gap-2">
                                         <MailBoxIcon size={14} />
-                                        <span>{lead.email}</span>
+                                        <span className="break-all">{lead.email}</span>
                                     </div>
                                 )}
                             </div>
@@ -334,54 +334,58 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                     </div>
 
                     {/* Dates */}
-                    <div className="flex items-center gap-6 text-xs text-neutral-600">
+                    <div className="flex flex-row sm:items-center gap-3 sm:gap-6 text-xs text-neutral-600 mb-4">
                         {lead.chatterDate && (
-                            <div className="flex items-center gap-1 border border-stroke py-1.5 px-2.5 rounded-full">
-                                <TickCorrectBoxIcon size={12} />
+                            <div className="flex items-center gap-1 border border-stroke py-1.5 px-2.5 rounded-full w-fit">
+                                <TickCorrectBoxIcon size={12} className="hidden sm:inline-block" />
                                 <span>Chatter: {lead.chatterDate}</span>
                             </div>
                         )}
                         {lead.internalDate && (
-                            <div className="flex items-center gap-1 border border-stroke py-1.5 px-2.5 rounded-full">
-                                <TickCorrectBoxIcon size={12} />
+                            <div className="flex items-center gap-1 border border-stroke py-1.5 px-2.5 rounded-full w-fit">
+                                <TickCorrectBoxIcon size={12} className="hidden sm:inline-block" />
                                 <span>Internal: {lead.internalDate}</span>
                             </div>
                         )}
                     </div>
 
-                    <hr className='w-full my-4 text-stroke' />
+                    <hr className='w-full my-4 border-stroke' />
 
                     {/* Dropdowns - Lead Phase, Sentiment, CRM */}
-                    <div className="flex items-center gap-3 flex-wrap">
-                        {/* Lead Phase Dropdown */}
-                        <LeadPhaseDropdown
-                            currentPhase={currentPhase}
-                            currentPhaseColor={currentPhaseColor}
-                            allPhases={allPhases}
-                            onPhaseChange={handlePhaseChange}
-                            onAddPhaseClick={() => {
-                                onClose();
-                                onAddPhaseClick();
-                            }}
-                        />
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                        {/* Lead Phase Dropdown - Takes full width on mobile */}
+                        <div className="w-full md:w-auto">
+                            <LeadPhaseDropdown
+                                currentPhase={currentPhase}
+                                currentPhaseColor={currentPhaseColor}
+                                allPhases={allPhases}
+                                onPhaseChange={handlePhaseChange}
+                                onAddPhaseClick={() => {
+                                    onClose();
+                                    onAddPhaseClick();
+                                }}
+                            />
+                        </div>
 
-                        {/* Sentiment Dropdown */}
-                        <SentimentDropdown
-                            currentSentiment={currentSentiment}
-                            onSentimentChange={handleSentimentChange}
-                        />
+                        {/* Sentiment Dropdown - Shares row with CRM on mobile */}
+                        <div className="flex-1 md:flex-none md:w-auto">
+                            <SentimentDropdown
+                                currentSentiment={currentSentiment}
+                                onSentimentChange={handleSentimentChange}
+                            />
+                        </div>
 
-                        {/* CRM Status */}
-                        <span className="px-3 py-1.5 bg-neutral-100 text-neutral-600 text-xs font-medium rounded-full cursor-pointer">
+                        {/* CRM Status - Shares row with Sentiment on mobile */}
+                        <span className="px-3 py-1.5 bg-neutral-100 text-neutral-600 text-xs font-medium rounded-full cursor-pointer whitespace-nowrap">
                             CRM: {lead.crmStatus || 'Not yet'}
                         </span>
                     </div>
                 </div>
 
                 {/* Activity Timeline */}
-                <div className="border-t border-stroke pt-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-sm font-semibold text-text/80 uppercase tracking-wide">
+                <div className="border-t border-stroke pt-4 md:pt-6">
+                    <div className="flex items-center justify-between mb-4 px-1">
+                        <h4 className="text-xs md:text-sm font-semibold text-text/80 uppercase tracking-wide">
                             Activity Timeline
                         </h4>
                         <ActionsDropdown
@@ -420,14 +424,14 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                     </div>
 
                     {/* Tabs */}
-                    <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
+                    <div className="flex items-center gap-2 mb-4 md:mb-6 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
                         {tabs.map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-colors ${activeTab === tab
-                                    ? 'bg-icon-linkedin text-white'
-                                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                                className={`px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-full whitespace-nowrap transition-colors flex-shrink-0 ${activeTab === tab
+                                        ? 'bg-icon-linkedin text-white'
+                                        : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                                     }`}
                             >
                                 {tab}
@@ -436,61 +440,61 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                     </div>
 
                     {/* Timeline Content */}
-                    <div className="space-y-6 pr-2 max-h-[500px] overflow-y-auto">
+                    <div className="space-y-4 md:space-y-6 pr-1 md:pr-2 max-h-[400px] md:max-h-[500px] overflow-y-auto">
                         {filteredTimeline.length > 0 ? (
                             filteredTimeline.map((item, index) => (
-                                <div key={item.id} className="flex gap-4 relative">
+                                <div key={item.id} className="flex gap-3 md:gap-4 relative">
                                     {/* Vertical Line - connects icons */}
                                     {index !== filteredTimeline.length - 1 && (
-                                        <div className="absolute left-4 top-9 bottom-0 w-0.5 bg-stroke -mb-6" />
+                                        <div className="absolute left-3 md:left-4 top-9 bottom-0 w-0.5 bg-stroke -mb-4 md:-mb-6" />
                                     )}
 
                                     {/* Icon */}
                                     <div className="flex-shrink-0 relative z-10">
                                         {item.type === 'linkedin-sent' || item.type === 'linkedin-received' ? (
-                                            <div className="w-9 h-9 rounded-full border-2 border-white/90 bg-icon-linkedin flex items-center justify-center">
-                                                <LinkedinBoldIcon size={16} className="text-white" />
+                                            <div className="w-7 h-7 md:w-9 md:h-9 rounded-full border-2 border-white/90 bg-icon-linkedin flex items-center justify-center">
+                                                <LinkedinBoldIcon size={14} className="text-white md:w-4 md:h-4" />
                                             </div>
                                         ) : item.type === 'phase-change' ? (
-                                            <div className="w-9 h-9 rounded-full border-2 border-white/90 bg-icon-linkedin flex items-center justify-center">
-                                                <PhaseChangeIcon size={16} className="text-white" />
+                                            <div className="w-7 h-7 md:w-9 md:h-9 rounded-full border-2 border-white/90 bg-icon-linkedin flex items-center justify-center">
+                                                <PhaseChangeIcon size={14} className="text-white md:w-4 md:h-4" />
                                             </div>
                                         ) : item.type === 'task-chatter' || item.type === 'task-internal' ? (
-                                            <div className="w-9 h-9 rounded-full border-2 border-white/90 bg-icon-linkedin flex items-center justify-center">
-                                                <TickCorrectBoxIcon size={16} className="text-white" />
+                                            <div className="w-7 h-7 md:w-9 md:h-9 rounded-full border-2 border-white/90 bg-icon-linkedin flex items-center justify-center">
+                                                <TickCorrectBoxIcon size={14} className="text-white md:w-4 md:h-4" />
                                             </div>
                                         ) : (
-                                            <div className="w-9 h-9 rounded-full border-2 border-white/90 bg-icon-linkedin flex items-center justify-center">
-                                                <FileIcon size={16} className="text-white" />
+                                            <div className="w-7 h-7 md:w-9 md:h-9 rounded-full border-2 border-white/90 bg-icon-linkedin flex items-center justify-center">
+                                                <FileIcon size={14} className="text-white md:w-4 md:h-4" />
                                             </div>
                                         )}
                                     </div>
 
                                     {/* Content */}
-                                    <div className="flex-1">
+                                    <div className="flex-1 min-w-0">
                                         {/* Date */}
-                                        <p className="text-xs font-medium text-text mb-2">{item.date}</p>
+                                        <p className="text-2xs md:text-xs font-medium text-text mb-2">{item.date}</p>
 
                                         {/* LinkedIn Message Sent */}
                                         {item.type === 'linkedin-sent' && (
                                             <LeadPhaseTimelineHeader title="LinkedIn Message Sent">
-                                                <div className='px-4 pb-4'>
+                                                <div className='px-3 md:px-4 pb-3 md:pb-4'>
                                                     <div className="flex justify-end">
-                                                        <div className="bg-primary-button w-11/12 text-white rounded-2xl rounded-br-md p-4 mb-2">
-                                                            <p className="text-sm">{item.message}</p>
+                                                        <div className="bg-primary-button w-full sm:w-11/12 text-white rounded-2xl rounded-br-md p-3 md:p-4 mb-2">
+                                                            <p className="text-xs md:text-sm break-words">{item.message}</p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-6 text-sm font-medium pt-3">
+                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-xs md:text-sm font-medium pt-2 md:pt-3">
                                                         <button
                                                             onClick={() => toast.info('Opening LinkedIn reply...')}
-                                                            className="flex items-center gap-2 text-primary-button cursor-pointer">
-                                                            <ReplyIcon size={16} />
+                                                            className="flex items-center gap-2 text-primary-button cursor-pointer w-fit">
+                                                            <ReplyIcon size={14} />
                                                             Reply to LinkedIn
                                                         </button>
                                                         <button
                                                             onClick={() => toast.info('Opening conversation...')}
-                                                            className="flex items-center gap-2 text-neutral-600 hover:underline">
-                                                            <ViewConversationIcon size={16} />
+                                                            className="flex items-center gap-2 text-neutral-600 hover:underline w-fit">
+                                                            <ViewConversationIcon size={14} />
                                                             View conversation
                                                         </button>
                                                     </div>
@@ -501,23 +505,23 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                         {/* LinkedIn Message Received */}
                                         {item.type === 'linkedin-received' && (
                                             <LeadPhaseTimelineHeader title="LinkedIn Message Received">
-                                                <div className='px-4 pb-4'>
+                                                <div className='px-3 md:px-4 pb-3 md:pb-4'>
                                                     <div className="flex justify-start">
-                                                        <div className="bg-neutral-100 w-11/12 text-text-heading rounded-2xl rounded-bl-md p-4 mb-2">
-                                                            <p className="text-sm">{item.message}</p>
+                                                        <div className="bg-neutral-100 w-full sm:w-11/12 text-text-heading rounded-2xl rounded-bl-md p-3 md:p-4 mb-2">
+                                                            <p className="text-xs md:text-sm break-words">{item.message}</p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-6 text-sm font-medium pt-3">
+                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-xs md:text-sm font-medium pt-2 md:pt-3">
                                                         <button
-                                                            onClick={() => toast.info('Opening conversation...')}
-                                                            className="flex items-center gap-2 text-primary-button cursor-pointer">
-                                                            <ReplyIcon size={16} />
+                                                            onClick={() => toast.info('Opening LinkedIn reply...')}
+                                                            className="flex items-center gap-2 text-primary-button cursor-pointer w-fit">
+                                                            <ReplyIcon size={14} />
                                                             Reply to LinkedIn
                                                         </button>
                                                         <button
                                                             onClick={() => toast.info('Opening conversation...')}
-                                                            className="flex items-center gap-2 text-neutral-600 hover:underline">
-                                                            <ViewConversationIcon size={16} />
+                                                            className="flex items-center gap-2 text-neutral-600 hover:underline w-fit">
+                                                            <ViewConversationIcon size={14} />
                                                             View conversation
                                                         </button>
                                                     </div>
@@ -528,16 +532,15 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                         {/* Phase Change */}
                                         {item.type === 'phase-change' && (
                                             <LeadPhaseTimelineHeader title="Phase Change">
-                                                <div className='px-4 pb-4'>
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="px-3 py-1.5 text-text border border-stroke text-xs font-medium rounded-full">
+                                                <div className='px-3 md:px-4 pb-3 md:pb-4'>
+                                                    <div className="flex flex-wrap sm:items-center gap-2 sm:gap-3">
+                                                        <span className="px-3 py-1.5 text-text border border-stroke text-2xs md:text-xs font-medium rounded-full w-fit">
                                                             {item.oldPhase}
                                                         </span>
-                                                        <ArrowRightDirectionIcon className='text-neutral-700' size={10} />
-                                                        <button className="px-3 py-1.5 border border-phase-green-dark/20 bg-phase-green-dark/20 text-phase-green-dark/50 text-xs font-medium rounded-full flex items-center gap-2 transition-colors">
-                                                            <span className='text-phase-green-dark'>{item.newPhase}</span>
-                                                            {/* <ArrowDownIcon size={9} /> */}
-                                                        </button>
+                                                        <ArrowRightDirectionIcon className='text-neutral-700 hidden sm:block' size={10} />
+                                                        <span className="px-3 py-1.5 border border-phase-green-dark/20 bg-phase-green-dark/20 text-phase-green-dark text-2xs md:text-xs font-medium rounded-full w-fit">
+                                                            {item.newPhase}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </LeadPhaseTimelineHeader>
@@ -548,33 +551,33 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                             <LeadPhaseTimelineHeader
                                                 title={item.title || (item.type === 'task-chatter' ? 'Chatter Task' : 'Internal Task')}
                                                 headerActions={
-                                                    <>
+                                                    <div className="flex flex-row gap-2 sm:gap-3">
                                                         <button
                                                             onClick={() => handleCancelTask(item.id, item.type)}
-                                                            className="text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1 cursor-pointer">
-                                                            <CancelIcon size={14} />
+                                                            className="text-2xs md:text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1 cursor-pointer w-fit">
+                                                            <CancelIcon size={12} />
                                                             Cancel {item.type === 'task-chatter' ? 'chatter' : 'internal'} task
                                                         </button>
                                                         <button
                                                             onClick={() => toast.info('Opening task details...')}
-                                                            className="text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1 cursor-pointer">
-                                                            <OpenIcon size={14} />
+                                                            className="text-2xs md:text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1 cursor-pointer w-fit">
+                                                            <OpenIcon size={12} />
                                                             Open
                                                         </button>
-                                                    </>
+                                                    </div>
                                                 }
                                             >
-                                                <div className='px-4 pb-4'>
+                                                <div className='px-3 md:px-4 pb-3 md:pb-4'>
                                                     {item.description && (
-                                                        <p className="text-sm text-neutral-600 mb-2">{item.description}</p>
+                                                        <p className="text-xs md:text-sm text-neutral-600 mb-2 break-words">{item.description}</p>
                                                     )}
                                                     {item.assignedTo && (
-                                                        <p className="text-xs text-neutral-500 mb-2">
+                                                        <p className="text-2xs md:text-xs text-neutral-500 mb-2">
                                                             Assigned to: <span className="font-medium">{item.assignedTo}</span>
                                                         </p>
                                                     )}
                                                     {item.dueDate && (
-                                                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 text-xs font-medium rounded-full">
+                                                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 text-2xs md:text-xs font-medium rounded-full">
                                                             <CalendarIcon size={12} className='text-red-600' />
                                                             due: {item.dueDate}
                                                         </span>
@@ -588,16 +591,14 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                             <LeadPhaseTimelineHeader
                                                 title={item.title || 'System Update'}
                                                 headerActions={
-                                                    <>
-                                                        <span className="text-xs text-neutral-500 flex items-center gap-1">
-                                                            <SinglePersonIcon size={14} />
-                                                            System
-                                                        </span>
-                                                    </>
+                                                    <span className="text-2xs md:text-xs text-neutral-500 flex items-center gap-1">
+                                                        <SinglePersonIcon size={12} />
+                                                        System
+                                                    </span>
                                                 }
                                             >
-                                                <div className='px-4 pb-4'>
-                                                    <p className="text-sm text-neutral-600 mb-2">{item.content}</p>
+                                                <div className='px-3 md:px-4 pb-3 md:pb-4'>
+                                                    <p className="text-xs md:text-sm text-neutral-600 mb-2 break-words">{item.content}</p>
                                                 </div>
                                             </LeadPhaseTimelineHeader>
                                         )}
@@ -607,16 +608,14 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                             <LeadPhaseTimelineHeader
                                                 title={'Note'}
                                                 headerActions={
-                                                    <>
-                                                        <span className="text-xs text-neutral-500 flex items-center gap-1">
-                                                            <SinglePersonIcon size={14} />
-                                                            {item.author}
-                                                        </span>
-                                                    </>
+                                                    <span className="text-2xs md:text-xs text-neutral-500 flex items-center gap-1">
+                                                        <SinglePersonIcon size={12} />
+                                                        {item.author}
+                                                    </span>
                                                 }
                                             >
-                                                <div className='px-4 pb-4'>
-                                                    <p className="text-sm text-neutral-600 mb-2">{item.content}</p>
+                                                <div className='px-3 md:px-4 pb-3 md:pb-4'>
+                                                    <p className="text-xs md:text-sm text-neutral-600 mb-2 break-words">{item.content}</p>
                                                 </div>
                                             </LeadPhaseTimelineHeader>
                                         )}
@@ -624,7 +623,7 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                 </div>
                             ))
                         ) : (
-                            <p className="text-sm text-neutral-400 text-center py-8">
+                            <p className="text-xs md:text-sm text-neutral-400 text-center py-8">
                                 No {activeTab.toLowerCase()} found
                             </p>
                         )}

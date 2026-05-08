@@ -5,6 +5,17 @@ import { ArrowDownIcon, GridViewIcon, ListViewIcon, SearchIcon } from '../Icons'
 import SortByDropdown from './dropdowns/SortByDropdown';
 import FilterDropdown from './dropdowns/FilterDropdown';
 
+interface FilterState {
+    lastMessageFrom: string;
+    lastMessageTo: string;
+    internalTaskFrom: string;
+    internalTaskTo: string;
+    company: string;
+    role: string;
+    leadPhases: string[];
+    sentiments: string[];
+}
+
 interface LeadsTopBarProps {
     searchQuery: string;
     onSearchChange: (query: string) => void;
@@ -12,6 +23,7 @@ interface LeadsTopBarProps {
     onSortChange: (sort: string) => void;
     viewMode?: 'grid' | 'list';
     onViewModeChange?: (mode: 'grid' | 'list') => void;
+    onFilterChange: (filters: FilterState) => void;
 }
 
 const LeadsTopBar: React.FC<LeadsTopBarProps> = ({
@@ -20,7 +32,8 @@ const LeadsTopBar: React.FC<LeadsTopBarProps> = ({
     selectedSort,
     onSortChange,
     viewMode = 'grid',
-    onViewModeChange
+    onViewModeChange,
+    onFilterChange
 }) => {
     return (
         <>
@@ -43,7 +56,7 @@ const LeadsTopBar: React.FC<LeadsTopBarProps> = ({
 
                     {/* Filter Dropdown */}
                     <div className="w-full">
-                        <FilterDropdown />
+                        <FilterDropdown onFilterApply={onFilterChange} />
                     </div>
 
                     {/* Status Dropdown */}
@@ -74,10 +87,11 @@ const LeadsTopBar: React.FC<LeadsTopBarProps> = ({
                                 {/* List View Button */}
                                 <button
                                     onClick={() => onViewModeChange('list')}
-                                    className={`flex items-center justify-center h-full px-1.5 rounded-l-lg transition-colors ${viewMode === 'list'
+                                    className={`flex items-center justify-center h-full px-1.5 rounded-l-lg transition-colors ${
+                                        viewMode === 'list'
                                             ? 'bg-stroke'
                                             : 'hover:bg-neutral-50'
-                                        }`}
+                                    }`}
                                 >
                                     <ListViewIcon size={18} className={viewMode === 'list' ? 'text-black' : 'text-text-heading'} />
                                 </button>
@@ -85,10 +99,11 @@ const LeadsTopBar: React.FC<LeadsTopBarProps> = ({
                                 {/* Grid View Button */}
                                 <button
                                     onClick={() => onViewModeChange('grid')}
-                                    className={`flex items-center justify-center h-full px-1.5 rounded-r-lg transition-colors ${viewMode === 'grid'
+                                    className={`flex items-center justify-center h-full px-1.5 rounded-r-lg transition-colors ${
+                                        viewMode === 'grid'
                                             ? 'bg-stroke'
                                             : 'hover:bg-neutral-50'
-                                        }`}
+                                    }`}
                                 >
                                     <GridViewIcon size={18} className={viewMode === 'grid' ? 'text-black' : 'text-text-heading'} />
                                 </button>
@@ -111,7 +126,7 @@ const LeadsTopBar: React.FC<LeadsTopBarProps> = ({
                     />
 
                     {/* Filter Dropdown */}
-                    <FilterDropdown />
+                    <FilterDropdown onFilterApply={onFilterChange} />
 
                     {/* Status Dropdown */}
                     <button className="flex items-center gap-2 px-3 py-2 text-sm text-text-breadcrumb border border-stroke rounded-lg hover:bg-neutral-50 hover:border-stroke/85 transition-all">
@@ -141,10 +156,11 @@ const LeadsTopBar: React.FC<LeadsTopBarProps> = ({
                             {/* List View Button */}
                             <button
                                 onClick={() => onViewModeChange('list')}
-                                className={`p-2 rounded-lg transition-colors ${viewMode === 'list'
-                                    ? 'bg-stroke text-primary'
-                                    : 'hover:bg-neutral-50 text-text-heading hover:text-neutral-600'
-                                    }`}
+                                className={`p-2 rounded-lg transition-colors ${
+                                    viewMode === 'list'
+                                        ? 'bg-stroke text-primary'
+                                        : 'hover:bg-neutral-50 text-text-heading hover:text-neutral-600'
+                                }`}
                             >
                                 <ListViewIcon size={22} className={viewMode === 'list' ? 'text-black' : ''} />
                             </button>
@@ -152,10 +168,11 @@ const LeadsTopBar: React.FC<LeadsTopBarProps> = ({
                             {/* Grid View Button */}
                             <button
                                 onClick={() => onViewModeChange('grid')}
-                                className={`p-2 rounded-lg transition-colors ${viewMode === 'grid'
-                                    ? 'bg-stroke text-primary'
-                                    : 'hover:bg-neutral-50 text-text-heading hover:text-neutral-600'
-                                    }`}
+                                className={`p-2 rounded-lg transition-colors ${
+                                    viewMode === 'grid'
+                                        ? 'bg-stroke text-primary'
+                                        : 'hover:bg-neutral-50 text-text-heading hover:text-neutral-600'
+                                }`}
                             >
                                 <GridViewIcon size={22} className={viewMode === 'grid' ? 'text-black' : ''} />
                             </button>

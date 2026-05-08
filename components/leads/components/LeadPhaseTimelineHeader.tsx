@@ -17,7 +17,7 @@ const LeadPhaseTimelineHeader: React.FC<LeadPhaseTimelineHeaderProps> = ({
 }) => {
     return (
         <div className='rounded-xl border border-stroke'>
-            <div className="flex items-center justify-between mb-3 p-4 border-b border-stroke bg-stroke/30 rounded-t-xl">
+            <div className="flex items-center justify-between mb-3 p-3 md:p-4 border-b border-stroke bg-stroke/30 rounded-t-xl">
                 <div className="flex items-center gap-2">
                     {icon && <span className="flex-shrink-0">{icon}</span>}
                     <p className="text-sm font-medium text-text-heading">{title}</p>

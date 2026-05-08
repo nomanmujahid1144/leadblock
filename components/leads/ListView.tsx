@@ -24,10 +24,22 @@ interface Column {
     cards: Card[];
 }
 
+interface FilterState {
+    lastMessageFrom: string;
+    lastMessageTo: string;
+    internalTaskFrom: string;
+    internalTaskTo: string;
+    company: string;
+    role: string;
+    leadPhases: string[];
+    sentiments: string[];
+}
+
 interface ListViewProps {
     columns: Column[];
     searchQuery: string;
     selectedSort: string;
+    activeFilters: FilterState;
     onAddPhaseClick: () => void;
     onLeadClick: (lead: any) => void;
 }
@@ -70,7 +82,32 @@ const getSentimentColor = (sentiment: string) => {
     }
 };
 
-const ListView: React.FC<ListViewProps> = ({ columns, searchQuery, selectedSort, onAddPhaseClick, onLeadClick }) => {
+// Helper function to check if a date is within range
+const isDateInRange = (dateStr: string | undefined, fromDate: string, toDate: string): boolean => {
+    if (!dateStr || dateStr === 'N/A') return true;
+    if (!fromDate && !toDate) return true;
+
+    try {
+        const date = new Date(dateStr);
+        const from = fromDate ? new Date(fromDate) : null;
+        const to = toDate ? new Date(toDate) : null;
+
+        if (from && date < from) return false;
+        if (to && date > to) return false;
+        return true;
+    } catch {
+        return true;
+    }
+};
+
+const ListView: React.FC<ListViewProps> = ({ 
+    columns, 
+    searchQuery, 
+    selectedSort, 
+    activeFilters,
+    onAddPhaseClick, 
+    onLeadClick 
+}) => {
     // Flatten all cards from all columns
     const allCards = columns.flatMap(column =>
         column.cards.map(card => ({
@@ -82,13 +119,63 @@ const ListView: React.FC<ListViewProps> = ({ columns, searchQuery, selectedSort,
 
     // Filter cards
     const filteredCards = allCards.filter(card => {
-        if (!searchQuery) return true;
-        const search = searchQuery.toLowerCase();
-        return (
-            card.name.toLowerCase().includes(search) ||
-            card.company.toLowerCase().includes(search) ||
-            card.title.toLowerCase().includes(search)
-        );
+        // Search filter
+        if (searchQuery) {
+            const search = searchQuery.toLowerCase();
+            const matchesSearch = (
+                card.name.toLowerCase().includes(search) ||
+                card.company.toLowerCase().includes(search) ||
+                card.title.toLowerCase().includes(search)
+            );
+            if (!matchesSearch) return false;
+        }
+
+        // Date filters - Last Message
+        if (activeFilters.lastMessageFrom || activeFilters.lastMessageTo) {
+            if (!isDateInRange(card.chatterDate, activeFilters.lastMessageFrom, activeFilters.lastMessageTo)) {
+                return false;
+            }
+        }
+
+        // Date filters - Internal Task
+        if (activeFilters.internalTaskFrom || activeFilters.internalTaskTo) {
+            if (!isDateInRange(card.internalDate, activeFilters.internalTaskFrom, activeFilters.internalTaskTo)) {
+                return false;
+            }
+        }
+
+        // Company filter
+        if (activeFilters.company) {
+            if (!card.company.toLowerCase().includes(activeFilters.company.toLowerCase())) {
+                return false;
+            }
+        }
+
+        // Role filter
+        if (activeFilters.role) {
+            if (!card.title.toLowerCase().includes(activeFilters.role.toLowerCase())) {
+                return false;
+            }
+        }
+
+        // Lead Phase filter
+        if (activeFilters.leadPhases.length > 0) {
+            // Find the column this card belongs to
+            const cardColumn = columns.find(col => col.cards.some(c => c.id === card.id));
+            if (cardColumn && !activeFilters.leadPhases.includes(cardColumn.id)) {
+                return false;
+            }
+        }
+
+        // Sentiment filter
+        if (activeFilters.sentiments.length > 0) {
+            const matchesSentiment = activeFilters.sentiments.some(sentiment =>
+                card.sentiment.toLowerCase().includes(sentiment.toLowerCase())
+            );
+            if (!matchesSentiment) return false;
+        }
+
+        return true;
     });
 
     // Sort cards
@@ -248,7 +335,7 @@ const ListView: React.FC<ListViewProps> = ({ columns, searchQuery, selectedSort,
                                 {/* 3 Dots Menu */}
                                 <div className='flex justify-between gap-px items-center'>
                                     <div className="flex items-center">
-                                        <span className={`px-2 py-1 text-2xs font-normal rounded-full truncate max-w-[15ch] ${getSentimentColor(card.sentiment)}`}>
+                                        <span className={`px-2 py-1 text-2xs font-normal rounded-full truncate max-w-[15ch] inline-block ${getSentimentColor(card.sentiment)}`}>
                                             {card.sentiment}
                                         </span>
                                     </div>

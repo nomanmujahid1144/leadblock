@@ -20,6 +20,10 @@ interface FilterState {
     sentiments: string[];
 }
 
+interface FilterDropdownProps {
+    onFilterApply: (filters: FilterState) => void;
+}
+
 const getToday = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -43,7 +47,7 @@ const getDateRange = (type: 'today' | 'week' | 'month') => {
     };
 };
 
-const FilterDropdown: React.FC = () => {
+const FilterDropdown: React.FC<FilterDropdownProps> = ({ onFilterApply }) => {
     const [isOpen, setIsOpen] = useState(false);
     const triggerRef = useRef<HTMLButtonElement>(null);
 
@@ -59,7 +63,7 @@ const FilterDropdown: React.FC = () => {
     });
 
     const handleResetAll = () => {
-        setFilters({
+        const emptyFilters = {
             lastMessageFrom: '',
             lastMessageTo: '',
             internalTaskFrom: '',
@@ -68,13 +72,14 @@ const FilterDropdown: React.FC = () => {
             role: '',
             leadPhases: [],
             sentiments: []
-        });
+        };
+        setFilters(emptyFilters);
+        onFilterApply(emptyFilters); // Apply empty filters
     };
 
     const handleApplyFilters = () => {
-        console.log('Applied filters:', filters);
+        onFilterApply(filters); // Pass filters to parent
         setIsOpen(false);
-        // TODO: Apply filters to leads data
     };
 
     const toggleLeadPhase = (phaseId: string) => {
@@ -101,7 +106,7 @@ const FilterDropdown: React.FC = () => {
             <button
                 ref={triggerRef}
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 px-3 py-2 text-sm text-text-breadcrumb border border-stroke rounded-lg hover:bg-neutral-50 hover:border-stroke/85 transition-all"
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-text-breadcrumb border border-stroke rounded-lg hover:bg-neutral-50 hover:border-stroke/85 transition-all"
             >
                 <span>Filter</span>
                 <FilterIcon size={12} />
@@ -109,8 +114,8 @@ const FilterDropdown: React.FC = () => {
 
             {/* Dropdown */}
             <DropdownWrapper isOpen={isOpen} onClose={() => setIsOpen(false)} triggerRef={triggerRef}>
-                <div className="w-md max-h-[600px] overflow-y-auto">
-                    <div className="p-6">
+                <div className="w-[90vw] sm:w-96 md:w-[28rem] max-h-[70vh] md:max-h-[600px] overflow-y-auto">
+                    <div className="p-4 md:p-6">
                         {/* Date last message */}
                         <DateRangePicker
                             label="Date last message"
@@ -177,16 +182,16 @@ const FilterDropdown: React.FC = () => {
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="sticky bottom-0 bg-white border-t border-neutral-200 px-6 py-4 flex gap-3">
+                    <div className="sticky bottom-0 bg-white border-t border-neutral-200 px-4 md:px-6 py-3 md:py-4 flex flex-col sm:flex-row gap-2 sm:gap-3">
                         <button
                             onClick={handleResetAll}
-                            className="flex-1 px-6 py-2.5 text-sm font-medium text-neutral-600 bg-neutral-100 hover:bg-neutral-200 rounded-lg transition-colors"
+                            className="flex-1 px-4 md:px-6 py-2.5 text-sm font-medium text-neutral-600 bg-neutral-100 hover:bg-neutral-200 rounded-lg transition-colors"
                         >
                             Reset All
                         </button>
                         <button
                             onClick={handleApplyFilters}
-                            className="flex-1 px-6 py-2.5 text-sm font-medium text-white bg-icon-linkedin hover:enabled:bg-icon-linkedin/95 rounded-lg transition-colors"
+                            className="flex-1 px-4 md:px-6 py-2.5 text-sm font-medium text-white bg-icon-linkedin hover:enabled:bg-icon-linkedin/95 rounded-lg transition-colors"
                         >
                             Apply Filters
                         </button>
