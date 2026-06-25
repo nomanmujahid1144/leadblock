@@ -162,17 +162,6 @@ const LeadsTopBar: React.FC<LeadsTopBarProps> = ({
                         onReset={onLeadPhaseReset}
                     />
 
-                    {/* Reset All Filters Button */}
-                    {hasActiveFilters && (
-                        <button
-                            onClick={handleResetAll}
-                            title="Reset all filters"
-                            className="flex items-center justify-center w-9 h-9 bg-neutral-300/70 hover:bg-neutral-400/70 rounded-xl transition-colors"
-                        >
-                            <ResetIcon size={16} className="text-white" />
-                        </button>
-                    )}
-
                     {/* Search Input */}
                     <div className="w-96">
                         <div className="relative">
@@ -186,6 +175,18 @@ const LeadsTopBar: React.FC<LeadsTopBarProps> = ({
                             />
                         </div>
                     </div>
+
+                    {/* Reset All Filters Button */}
+                    {hasActiveFilters && (
+                        <button
+                            onClick={handleResetAll}
+                            title="Reset all filters"
+                            className="flex items-center justify-center w-9 h-9 bg-neutral-300/70 hover:bg-neutral-400/70 rounded-xl transition-colors"
+                        >
+                            <ResetIcon size={16} className="text-white" />
+                        </button>
+                    )}
+
                 </div>
 
                 {/* View Toggle */}
