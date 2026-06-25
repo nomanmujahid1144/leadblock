@@ -35,14 +35,21 @@ const getSentimentColors = (sentiment: string) => {
             textDark: 'text-sentiment-negative-dark',
             hover: 'hover:bg-red-200'
         };
+    } else if (sentiment.includes('DMU')) {
+        return {
+            bg: 'bg-sentiment-dmu',
+            border: 'border-sentiment-dmu-dark/20',
+            text: 'text-sentiment-dmu-dark/50',
+            textDark: 'text-sentiment-dmu-dark',
+            hover: 'hover:bg-yellow-200'
+        };
     } else {
-        // Neutral or Other DMU
         return {
             bg: 'bg-sentiment-neutral',
             border: 'border-sentiment-neutral-dark/20',
             text: 'text-sentiment-neutral-dark/50',
             textDark: 'text-sentiment-neutral-dark',
-            hover: 'hover:bg-neutral-300'
+            hover: 'hover:bg-yellow-100'
         };
     }
 };
@@ -96,11 +103,10 @@ const SentimentDropdown: React.FC<SentimentDropdownProps> = ({
                         <button
                             key={sentiment}
                             onClick={() => handleSentimentSelect(sentiment)}
-                            className={`w-full px-4 py-2 text-xs text-left transition-colors cursor-pointer ${
-                                sentiment === currentSentiment
+                            className={`w-full px-4 py-2 text-xs text-left transition-colors cursor-pointer ${sentiment === currentSentiment
                                     ? 'font-medium'
                                     : 'hover:bg-neutral-50'
-                            }`}
+                                }`}
                         >
                             {sentiment}
                         </button>

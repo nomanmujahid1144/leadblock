@@ -2,13 +2,15 @@
 
 import React, { useState } from 'react';
 import Modal from '../Modal';
-import { AddNoteIcon, AddTaskIcon, ArrowDownIcon, ArrowRightDirectionIcon, CalendarIcon, CancelIcon, FileIcon, LinkedinBoldIcon, MailBoxIcon, OpenIcon, PhaseChangeIcon, PhoneIcon, PlusIcon, ReplyIcon, SendCRMIcon, SinglePersonIcon, TickCorrectBoxIcon, ViewConversationIcon } from '../Icons';
+import { AddNoteIcon, AddTaskIcon, ArrowDownIcon, ArrowRightDirectionIcon, CalendarIcon, CancelIcon, FileIcon, LinkedinBoldIcon, MailBoxIcon, OpenIcon, PhaseChangeIcon, PhoneIcon, PlusIcon, ReplyIcon, SendCRMIcon, SinglePersonIcon, TickCorrectBoxIcon, ViewConversationIcon, PencilEditIcon } from '../Icons';
 import LeadPhaseTimelineHeader from './components/LeadPhaseTimelineHeader';
 import ActionsDropdown from '../ActionsDropdown';
 import AddNoteModal from './AddNoteModal';
 import AddTaskModal from './AddTaskModal';
 import LeadPhaseDropdown from './LeadPhaseDropdown';
 import SentimentDropdown from './SentimentDropdown';
+import EditNoteModal from './EditNoteModal';
+import DeleteNoteModal from './DeleteNoteModal';
 import { toast } from '@/lib/toast';
 
 interface LeadProfileModalProps {
@@ -27,11 +29,13 @@ interface LeadProfileModalProps {
         phaseColor: string;
         sentiment: string;
         crmStatus?: string;
+        linkedinUrl?: string;
     } | null;
     allPhases: { id: string; title: string; color: string }[];
     onAddPhaseClick: () => void;
     onPhaseChange: (leadId: string, newPhase: string, newPhaseColor: string) => void;
     onSentimentChange: (leadId: string, newSentiment: string) => void;
+    initialTab?: string;
 }
 
 // Timeline item type
@@ -92,6 +96,15 @@ const initialMockTimelineData: TimelineItem[] = [
     }
 ];
 
+
+// Add above the component (or reuse — same function)
+const formatDate = (date: string | undefined): string => {
+    if (!date || date === 'N/A') return 'N/A';
+    const d = new Date(date + 'T00:00:00');
+    if (isNaN(d.getTime())) return date;
+    return `${d.getDate()} ${d.toLocaleString('en-US', { month: 'short' })} ${d.getFullYear()}`;
+};
+
 const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
     isOpen,
     onClose,
@@ -100,6 +113,7 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
     onAddPhaseClick,
     onPhaseChange,
     onSentimentChange,
+    initialTab = 'All'
 }) => {
     const [activeTab, setActiveTab] = useState('All');
     const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false);
@@ -107,6 +121,10 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
     const [currentPhase, setCurrentPhase] = useState(lead?.phase || '');
     const [currentPhaseColor, setCurrentPhaseColor] = useState(lead?.phaseColor || '');
     const [currentSentiment, setCurrentSentiment] = useState(lead?.sentiment || '');
+    const [currentCrmStatus, setCurrentCrmStatus] = useState(lead?.crmStatus || 'Not yet');
+    const [isEditNoteModalOpen, setIsEditNoteModalOpen] = useState(false);
+    const [isDeleteNoteModalOpen, setIsDeleteNoteModalOpen] = useState(false);
+    const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
 
     // Add timeline state
     const [timelineData, setTimelineData] = useState<TimelineItem[]>(initialMockTimelineData);
@@ -117,6 +135,7 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
     // Initialize state when lead changes
     React.useEffect(() => {
         if (lead) {
+            console.log(lead, 'lead.crmStatus')
             // Only reset timeline if we're opening a DIFFERENT lead
             if (lead.id !== currentLeadId) {
                 setTimelineData(initialMockTimelineData);
@@ -127,6 +146,8 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
             setCurrentPhase(lead.phase);
             setCurrentPhaseColor(lead.phaseColor);
             setCurrentSentiment(lead.sentiment);
+            setCurrentCrmStatus(lead.crmStatus || 'Not yet');
+            setActiveTab(initialTab);
         }
     }, [lead, currentLeadId]);
 
@@ -221,13 +242,29 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
         }
     };
 
+    // Handle Edit a note
+    const handleEditNote = (content: string) => {
+        setTimelineData(prev => prev.map(i =>
+            i.id === activeNoteId ? { ...i, content } : i
+        ));
+        setActiveNoteId(null);
+    };
+
+    // Delete a Note
+    const handleDeleteNote = () => {
+        setTimelineData(prev => prev.filter(i => i.id !== activeNoteId));
+        setIsDeleteNoteModalOpen(false);
+        setActiveNoteId(null);
+        toast.success('Note deleted');
+    };
+
     // Handler for adding a task
     const handleAddTask = (task: { title: string; note: string; dueDate: string; assignTo: string }) => {
         const now = new Date();
         const formattedDate = `${now.getDate()} ${now.toLocaleString('en-US', { month: 'short' })} ${now.getFullYear()} - ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}`;
 
         // Determine task type based on assignTo field (simple logic)
-        const taskType = task.assignTo.toLowerCase().includes('chatter') ? 'task-chatter' : 'task-chatter';
+        const taskType: 'task-chatter' | 'task-internal' = task.assignTo === 'internal' ? 'task-internal' : 'task-chatter';
 
         const newTask: TimelineItem = {
             id: `task-${Date.now()}`,
@@ -310,7 +347,14 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
                                 <h3 className="text-lg md:text-xl font-semibold text-text-heading break-words">{lead.name}</h3>
-                                <LinkedinBoldIcon className='text-calendar-picker flex-shrink-0' size={16} />
+                                <a
+                                    href={lead.linkedinUrl || '#'}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <LinkedinBoldIcon size={16} className="text-calendar-picker flex-shrink-0" />
+                                </a>
+
                             </div>
                             <p className="text-xs md:text-sm text-neutral-600 break-words">
                                 {lead.title} at <span className="font-medium">{lead.company}</span>
@@ -338,13 +382,13 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                         {lead.chatterDate && (
                             <div className="flex items-center gap-1 border border-stroke py-1.5 px-2.5 rounded-full w-fit">
                                 <TickCorrectBoxIcon size={12} className="hidden sm:inline-block" />
-                                <span>Chatter: {lead.chatterDate}</span>
+                                <span>Chatter: {formatDate(lead.chatterDate)}</span>
                             </div>
                         )}
                         {lead.internalDate && (
                             <div className="flex items-center gap-1 border border-stroke py-1.5 px-2.5 rounded-full w-fit">
                                 <TickCorrectBoxIcon size={12} className="hidden sm:inline-block" />
-                                <span>Internal: {lead.internalDate}</span>
+                                <span>Internal: {formatDate(lead.internalDate)}</span>
                             </div>
                         )}
                     </div>
@@ -377,7 +421,7 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
 
                         {/* CRM Status - Shares row with Sentiment on mobile */}
                         <span className="px-3 py-1.5 bg-neutral-100 text-neutral-600 text-xs font-medium rounded-full cursor-pointer whitespace-nowrap">
-                            CRM: {lead.crmStatus || 'Not yet'}
+                            CRM: {currentCrmStatus}
                         </span>
                     </div>
                 </div>
@@ -416,6 +460,7 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                     label: 'Send to CRM',
                                     icon: <SendCRMIcon size={18} />,
                                     onClick: () => {
+                                        setCurrentCrmStatus('Sent');
                                         toast.success('Lead sent to CRM');
                                     }
                                 }
@@ -430,8 +475,8 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
                                 className={`px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-full whitespace-nowrap transition-colors flex-shrink-0 ${activeTab === tab
-                                        ? 'bg-icon-linkedin text-white'
-                                        : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                                    ? 'bg-icon-linkedin text-white'
+                                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                                     }`}
                             >
                                 {tab}
@@ -484,7 +529,7 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                                             <p className="text-xs md:text-sm break-words">{item.message}</p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-xs md:text-sm font-medium pt-2 md:pt-3">
+                                                    {/* <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-xs md:text-sm font-medium pt-2 md:pt-3">
                                                         <button
                                                             onClick={() => toast.info('Opening LinkedIn reply...')}
                                                             className="flex items-center gap-2 text-primary-button cursor-pointer w-fit">
@@ -497,7 +542,7 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                                             <ViewConversationIcon size={14} />
                                                             View conversation
                                                         </button>
-                                                    </div>
+                                                    </div> */}
                                                 </div>
                                             </LeadPhaseTimelineHeader>
                                         )}
@@ -511,7 +556,7 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                                             <p className="text-xs md:text-sm break-words">{item.message}</p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-xs md:text-sm font-medium pt-2 md:pt-3">
+                                                    {/* <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-xs md:text-sm font-medium pt-2 md:pt-3">
                                                         <button
                                                             onClick={() => toast.info('Opening LinkedIn reply...')}
                                                             className="flex items-center gap-2 text-primary-button cursor-pointer w-fit">
@@ -524,7 +569,7 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                                             <ViewConversationIcon size={14} />
                                                             View conversation
                                                         </button>
-                                                    </div>
+                                                    </div> */}
                                                 </div>
                                             </LeadPhaseTimelineHeader>
                                         )}
@@ -558,12 +603,12 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                                             <CancelIcon size={12} />
                                                             Cancel {item.type === 'task-chatter' ? 'chatter' : 'internal'} task
                                                         </button>
-                                                        <button
+                                                        {/* <button
                                                             onClick={() => toast.info('Opening task details...')}
                                                             className="text-2xs md:text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1 cursor-pointer w-fit">
                                                             <OpenIcon size={12} />
                                                             Open
-                                                        </button>
+                                                        </button> */}
                                                     </div>
                                                 }
                                             >
@@ -579,7 +624,7 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                                     {item.dueDate && (
                                                         <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 text-2xs md:text-xs font-medium rounded-full">
                                                             <CalendarIcon size={12} className='text-red-600' />
-                                                            due: {item.dueDate}
+                                                            due: {formatDate(item.dueDate)}
                                                         </span>
                                                     )}
                                                 </div>
@@ -608,10 +653,30 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                                             <LeadPhaseTimelineHeader
                                                 title={'Note'}
                                                 headerActions={
-                                                    <span className="text-2xs md:text-xs text-neutral-500 flex items-center gap-1">
-                                                        <SinglePersonIcon size={12} />
-                                                        {item.author}
-                                                    </span>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-2xs md:text-xs text-neutral-500 flex items-center gap-1">
+                                                            <SinglePersonIcon size={12} />
+                                                            {item.author}
+                                                        </span>
+                                                        <button
+                                                            onClick={() => {
+                                                                setActiveNoteId(item.id);
+                                                                setIsEditNoteModalOpen(true);
+                                                            }}
+                                                            className="text-2xs md:text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1 cursor-pointer transition-colors"
+                                                        >
+                                                            <PencilEditIcon size={12} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => {
+                                                                setActiveNoteId(item.id);
+                                                                setIsDeleteNoteModalOpen(true);
+                                                            }}
+                                                            className="text-2xs md:text-xs text-neutral-500 hover:text-primary flex items-center gap-1 cursor-pointer transition-colors"
+                                                        >
+                                                            <CancelIcon size={12} />
+                                                        </button>
+                                                    </div>
                                                 }
                                             >
                                                 <div className='px-3 md:px-4 pb-3 md:pb-4'>
@@ -643,6 +708,19 @@ const LeadProfileModal: React.FC<LeadProfileModalProps> = ({
                 isOpen={isAddTaskModalOpen}
                 onClose={() => setIsAddTaskModalOpen(false)}
                 onSubmit={handleAddTask}
+            />
+
+            <EditNoteModal
+                isOpen={isEditNoteModalOpen}
+                onClose={() => { setIsEditNoteModalOpen(false); setActiveNoteId(null); }}
+                initialContent={timelineData.find(i => i.id === activeNoteId)?.content || ''}
+                onSubmit={handleEditNote}
+            />
+
+            <DeleteNoteModal
+                isOpen={isDeleteNoteModalOpen}
+                onClose={() => { setIsDeleteNoteModalOpen(false); setActiveNoteId(null); }}
+                onConfirm={handleDeleteNote}
             />
         </>
     );

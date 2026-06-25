@@ -14,27 +14,33 @@ export const leadsColumns = [
         chatterDate: 'N/A',
         internalDate: 'N/A',
         sentiment: 'POS maybe interested',
-        avatars: ['/leads/avatar-1.png', '/leads/avatar-2.png']
+        lastLinkedinDate: '2025-03-13',
+        // avatars: ['/leads/avatar-1.png', '/leads/avatar-2.png']
+        linkedinUrl: 'https://linkedin.com/in/koendriessens'
       },
       {
         id: '2',
         name: 'Sarah Johnson',
         title: 'Marketing Director',
         company: 'Digital Ventures',
-        chatterDate: '05-03-26',
-        internalDate: '06-03-26',
+        chatterDate: '2025-03-15',
+        internalDate: '2026-03-06',
         sentiment: 'Neutral',
-        avatars: ['/leads/avatar-3.png']
+        lastLinkedinDate: '2026-03-05',
+        // avatars: ['/leads/avatar-3.png'],
+        linkedinUrl: 'https://linkedin.com/in/sarahjohnson'
       },
       {
         id: '3',
         name: 'Michael Chen',
         title: 'VP of Sales',
         company: 'Growth Solutions',
-        chatterDate: '04-03-26',
-        internalDate: '05-03-26',
+        chatterDate: '2025-03-15',
+        internalDate: '2026-03-05',
         sentiment: 'POS interested',
-        avatars: ['/leads/avatar-1.png', '/leads/avatar-2.png']
+        lastLinkedinDate: '2026-01-10',
+        // avatars: ['/leads/avatar-1.png', '/leads/avatar-2.png']
+        linkedinUrl: 'https://linkedin.com/in/michaelchen'
       }
     ]
   },
@@ -50,10 +56,12 @@ export const leadsColumns = [
         name: 'Arnoud van Lent',
         title: 'Enterprise Account Manager',
         company: 'Cohelity',
-        chatterDate: '01-01-26',
-        internalDate: '04-01-26',
+        chatterDate: '2025-03-15',
+        internalDate: '2026-01-04',
         sentiment: 'Interested in follow-up',
-        avatars: ['/leads/avatar-3.png']
+        lastLinkedinDate: '2025-11-15',
+        // avatars: ['/leads/avatar-3.png']
+        linkedinUrl: 'https://linkedin.com/in/arnoudvanlent'
       }
     ]
   },
@@ -69,10 +77,12 @@ export const leadsColumns = [
         name: 'Emma Belean',
         title: 'Business Development Manager',
         company: 'b futurist',
-        chatterDate: '01-01-26',
-        internalDate: '04-01-26',
+        chatterDate: '2025-03-15',
+        internalDate: '2026-01-04',
         sentiment: 'Neutral',
-        avatars: ['/leads/avatar-1.png', '/leads/avatar-2.png']
+        lastLinkedinDate: '2025-08-01',
+        // avatars: ['/leads/avatar-1.png', '/leads/avatar-2.png']
+        linkedinUrl: 'https://linkedin.com/in/emmabelean'
       }
     ]
   },

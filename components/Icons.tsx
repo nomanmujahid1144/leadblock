@@ -420,5 +420,15 @@ export const CircularCheckMarkIcon: React.FC<IconProps> = ({ className = '', siz
         <path d="M8 12.75C8 12.75 9.6 13.6625 10.4 15C10.4 15 12.8 9.75 16 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 );
-
-
+export const ShareExportIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 12.5V3.33333M10 3.33333L7.08333 6.25M10 3.33333L12.9167 6.25" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M3.33333 11.6667V15C3.33333 15.9205 4.07953 16.6667 5 16.6667H15C15.9205 16.6667 16.6667 15.9205 16.6667 15V11.6667" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+export const ResetIcon: React.FC<IconProps> = ({ className = '', size = 20 }) => (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M13.5 8C13.5 11.0376 11.0376 13.5 8 13.5C4.96243 13.5 2.5 11.0376 2.5 8C2.5 4.96243 4.96243 2.5 8 2.5C9.67 2.5 11.17 3.22 12.22 4.36" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M10.5 4.5L12.5 4.5L12.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+);

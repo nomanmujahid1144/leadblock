@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import {
   DndContext,
   DragEndEvent,
+  DragOverEvent,
   DragOverlay,
   DragStartEvent,
   PointerSensor,
@@ -59,6 +60,12 @@ interface KanbanBoardProps {
   setColumns: (columns: Column[]) => void;
   onAddPhaseClick: () => void;
   onLeadClick: (lead: any) => void;
+  onEditPhase: (columnId: string) => void;
+  onDeletePhase: (columnId: string) => void;
+  onMoveColumnLeft: (columnId: string) => void;
+  onMoveColumnRight: (columnId: string) => void;
+  collapsedColumns: Record<string, boolean>;
+  onToggleCollapse: (columnId: string, collapsed: boolean) => void;
 }
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({
@@ -68,9 +75,16 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
   columns,
   setColumns,
   onAddPhaseClick,
-  onLeadClick
+  onLeadClick,
+  onEditPhase,
+  onDeletePhase,
+  onMoveColumnLeft,
+  onMoveColumnRight,
+  collapsedColumns,
+  onToggleCollapse
 }) => {
   const [activeCard, setActiveCard] = useState<Card | null>(null);
+  const [overCardId, setOverCardId] = useState<string | null>(null);
 
   // Setup sensors - DESKTOP ONLY (no touch for mobile)
   const sensors = useSensors(
@@ -95,11 +109,18 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     }
   };
 
+  // Handle drag over — track which card is being hovered
+  const handleDragOver = (event: DragOverEvent) => {
+    const { over } = event;
+    setOverCardId(over ? over.id as string : null);
+  };
+
   // Handle drag end
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
     setActiveCard(null);
+    setOverCardId(null);
 
     if (!over) return;
 
@@ -205,8 +226,8 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
   // Helper function to check if a date is within range
   const isDateInRange = (dateStr: string | undefined, fromDate: string, toDate: string): boolean => {
-    if (!dateStr || dateStr === 'N/A') return true; // If no date, don't filter out
-    if (!fromDate && !toDate) return true; // If no date range set, don't filter
+    if (!dateStr || dateStr === 'N/A') return true;
+    if (!fromDate && !toDate) return true;
 
     try {
       const date = new Date(dateStr);
@@ -217,7 +238,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
       if (to && date > to) return false;
       return true;
     } catch {
-      return true; // If date parsing fails, don't filter out
+      return true;
     }
   };
 
@@ -225,7 +246,6 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
   const processedColumns = useMemo(() => {
     return columns.map(column => {
       let cards = column.cards.filter(card => {
-        // Search filter
         if (searchQuery) {
           const search = searchQuery.toLowerCase();
           const matchesSearch = (
@@ -236,44 +256,38 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
           if (!matchesSearch) return false;
         }
 
-        // Date filters - Last Message
         if (activeFilters.lastMessageFrom || activeFilters.lastMessageTo) {
           if (!isDateInRange(card.chatterDate, activeFilters.lastMessageFrom, activeFilters.lastMessageTo)) {
             return false;
           }
         }
 
-        // Date filters - Internal Task
         if (activeFilters.internalTaskFrom || activeFilters.internalTaskTo) {
           if (!isDateInRange(card.internalDate, activeFilters.internalTaskFrom, activeFilters.internalTaskTo)) {
             return false;
           }
         }
 
-        // Company filter
         if (activeFilters.company) {
           if (!card.company.toLowerCase().includes(activeFilters.company.toLowerCase())) {
             return false;
           }
         }
 
-        // Role filter
         if (activeFilters.role) {
           if (!card.title.toLowerCase().includes(activeFilters.role.toLowerCase())) {
             return false;
           }
         }
 
-        // Lead Phase filter
         if (activeFilters.leadPhases.length > 0) {
           if (!activeFilters.leadPhases.includes(column.id)) {
             return false;
           }
         }
 
-        // Sentiment filter
         if (activeFilters.sentiments.length > 0) {
-          const matchesSentiment = activeFilters.sentiments.some(sentiment => 
+          const matchesSentiment = activeFilters.sentiments.some(sentiment =>
             card.sentiment.toLowerCase().includes(sentiment.toLowerCase())
           );
           if (!matchesSentiment) return false;
@@ -282,17 +296,20 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
         return true;
       });
 
-      // Sort
       if (selectedSort && selectedSort !== 'none') {
         cards = [...cards].sort((a, b) => {
           switch (selectedSort) {
             case 'name': return a.name.localeCompare(b.name);
             case 'company': return a.company.localeCompare(b.company);
             case 'sentiment': return a.sentiment.localeCompare(b.sentiment);
-            case 'date':
-              const dateA = new Date(a.chatterDate || a.internalDate || 0).getTime();
-              const dateB = new Date(b.chatterDate || b.internalDate || 0).getTime();
-              return dateB - dateA;
+            case 'date-desc':
+              const parseDescA = a.chatterDate && a.chatterDate !== 'N/A' ? new Date(a.chatterDate).getTime() : 0;
+              const parseDescB = b.chatterDate && b.chatterDate !== 'N/A' ? new Date(b.chatterDate).getTime() : 0;
+              return parseDescB - parseDescA;
+            case 'date-asc':
+              const parseAscA = a.chatterDate && a.chatterDate !== 'N/A' ? new Date(a.chatterDate).getTime() : 0;
+              const parseAscB = b.chatterDate && b.chatterDate !== 'N/A' ? new Date(b.chatterDate).getTime() : 0;
+              return parseAscA - parseAscB;
             default: return 0;
           }
         });
@@ -309,6 +326,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
       sensors={sensors}
       collisionDetection={closestCorners}
       onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
       <div className="relative">
@@ -330,6 +348,13 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
                   allColumns={columnsForDropdown}
                   onMoveCard={handleMoveCard}
                   onLeadClick={onLeadClick}
+                  onEditPhase={onEditPhase}
+                  onDeletePhase={onDeletePhase}
+                  onMoveColumnLeft={onMoveColumnLeft}
+                  onMoveColumnRight={onMoveColumnRight}
+                  isCollapsed={collapsedColumns[column.id] ?? false}
+                  onToggleCollapse={onToggleCollapse}
+                  overCardId={overCardId}
                 />
               </SortableContext>
             ))}

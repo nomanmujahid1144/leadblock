@@ -7,6 +7,8 @@ import AddLeadPhaseModal from '@/components/leads/AddLeadPhaseModal';
 import dynamic from 'next/dynamic';
 import { leadsColumns as initialLeadsColumns } from '@/data/leads/mockData';
 import LeadProfileModal from '@/components/leads/LeadProfileModal';
+import EditLeadPhaseModal from '@/components/leads/EditLeadPhaseModal';
+import DeleteLeadPhaseModal from '@/components/leads/DeleteLeadPhaseModal';
 
 // Define types...
 interface Card {
@@ -52,12 +54,24 @@ const KanbanBoard = dynamic(() => import('@/components/leads/KanbanBoard'), {
 
 export default function LeadsPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSort, setSelectedSort] = useState('none');
+  const [selectedSort, setSelectedSort] = useState('date-desc');
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [columns, setColumns] = useState<Column[]>(initialLeadsColumns);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+  const [collapsedColumns, setCollapsedColumns] = useState<Record<string, boolean>>(() => {
+    if (typeof window === 'undefined') return {};
+    try {
+      const saved = localStorage.getItem('nova-collapsed-columns');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+  const [editPhaseModalOpen, setEditPhaseModalOpen] = useState(false);
+  const [deletePhaseModalOpen, setDeletePhaseModalOpen] = useState(false);
+  const [activePhaseId, setActivePhaseId] = useState<string | null>(null);
+
   // Add active filters state
   const [activeFilters, setActiveFilters] = useState<FilterState>({
     lastMessageFrom: '',
@@ -66,7 +80,7 @@ export default function LeadsPage() {
     internalTaskTo: '',
     company: '',
     role: '',
-    leadPhases: [],
+    leadPhases: ['needs-review', 'follow-up-myself', 'leadblocks-follow-up', 'in-progress', 'meeting-planned'],
     sentiments: []
   });
 
@@ -88,7 +102,8 @@ export default function LeadsPage() {
       ...lead,
       email: `${lead.name.split(' ')[0].toLowerCase()}@${lead.company.toLowerCase().replace(' ', '')}.com`,
       phone: '(+31) 610887057',
-      crmStatus: 'Not yet'
+      crmStatus: 'Not yet',
+      initialTab: lead.initialTab || 'All'
     });
   };
 
@@ -154,8 +169,8 @@ export default function LeadsPage() {
   const handleSentimentChange = (leadId: string, newSentiment: string) => {
     setColumns(columns.map(col => ({
       ...col,
-      cards: col.cards.map(card => 
-        card.id === leadId 
+      cards: col.cards.map(card =>
+        card.id === leadId
           ? { ...card, sentiment: newSentiment }
           : card
       )
@@ -174,6 +189,70 @@ export default function LeadsPage() {
     setActiveFilters(filters);
   };
 
+  // Lead phase toggle for the top bar dropdown
+  const handleLeadPhaseToggle = (phaseId: string) => {
+    const updated = activeFilters.leadPhases.includes(phaseId)
+      ? activeFilters.leadPhases.filter(id => id !== phaseId)
+      : [...activeFilters.leadPhases, phaseId];
+    setActiveFilters({ ...activeFilters, leadPhases: updated });
+  };
+
+  const handleLeadPhaseReset = () => {
+    setActiveFilters({ ...activeFilters, leadPhases: ['needs-review', 'follow-up-myself', 'leadblocks-follow-up', 'in-progress', 'meeting-planned'] });
+  };
+
+  const handleToggleCollapse = (columnId: string, collapsed: boolean) => {
+    setCollapsedColumns(prev => {
+      const updated = { ...prev, [columnId]: collapsed };
+      try {
+        localStorage.setItem('nova-collapsed-columns', JSON.stringify(updated));
+      } catch { }
+      return updated;
+    });
+  };
+
+  const handleEditPhase = (columnId: string) => {
+    setActivePhaseId(columnId);
+    setEditPhaseModalOpen(true);
+  };
+
+  const handleDeletePhase = (columnId: string) => {
+    setActivePhaseId(columnId);
+    setDeletePhaseModalOpen(true);
+  };
+
+  const handleEditPhaseSubmit = (name: string, colorHex: string) => {
+    setColumns(columns.map(col =>
+      col.id === activePhaseId
+        ? { ...col, title: name, color: `bg-[${colorHex}]` }
+        : col
+    ));
+    setEditPhaseModalOpen(false);
+    setActivePhaseId(null);
+  };
+
+  const handleDeletePhaseConfirm = () => {
+    setColumns(columns.filter(col => col.id !== activePhaseId));
+    setDeletePhaseModalOpen(false);
+    setActivePhaseId(null);
+  };
+
+  const handleMoveColumnLeft = (columnId: string) => {
+    const index = columns.findIndex(col => col.id === columnId);
+    if (index <= 0) return;
+    const newColumns = [...columns];
+    [newColumns[index - 1], newColumns[index]] = [newColumns[index], newColumns[index - 1]];
+    setColumns(newColumns);
+  };
+
+  const handleMoveColumnRight = (columnId: string) => {
+    const index = columns.findIndex(col => col.id === columnId);
+    if (index >= columns.length - 1) return;
+    const newColumns = [...columns];
+    [newColumns[index], newColumns[index + 1]] = [newColumns[index + 1], newColumns[index]];
+    setColumns(newColumns);
+  };
+
   return (
     <div className="min-h-screen px-4 md:px-6 lg:px-8 py-6">
       <LeadsTopBar
@@ -184,6 +263,10 @@ export default function LeadsPage() {
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         onFilterChange={handleFilterChange}
+        activeLeadPhases={activeFilters.leadPhases}
+        onLeadPhaseToggle={handleLeadPhaseToggle}
+        onLeadPhaseReset={handleLeadPhaseReset}
+        activeFilters={activeFilters}
       />
 
       {viewMode === 'grid' ? (
@@ -195,6 +278,12 @@ export default function LeadsPage() {
           setColumns={setColumns}
           onAddPhaseClick={() => setIsModalOpen(true)}
           onLeadClick={handleLeadClick}
+          onEditPhase={handleEditPhase}
+          onDeletePhase={handleDeletePhase}
+          onMoveColumnLeft={handleMoveColumnLeft}
+          onMoveColumnRight={handleMoveColumnRight}
+          collapsedColumns={collapsedColumns}
+          onToggleCollapse={handleToggleCollapse}
         />
       ) : (
         <ListView
@@ -228,7 +317,24 @@ export default function LeadsPage() {
         }}
         onPhaseChange={handlePhaseChange}
         onSentimentChange={handleSentimentChange}
+        initialTab={selectedLead?.initialTab || 'All'}
       />
+
+      <EditLeadPhaseModal
+        isOpen={editPhaseModalOpen}
+        onClose={() => { setEditPhaseModalOpen(false); setActivePhaseId(null); }}
+        onSubmit={handleEditPhaseSubmit}
+        initialName={columns.find(col => col.id === activePhaseId)?.title || ''}
+        initialColor={columns.find(col => col.id === activePhaseId)?.color || ''}
+      />
+
+      <DeleteLeadPhaseModal
+        isOpen={deletePhaseModalOpen}
+        onClose={() => { setDeletePhaseModalOpen(false); setActivePhaseId(null); }}
+        onConfirm={handleDeletePhaseConfirm}
+        phaseName={columns.find(col => col.id === activePhaseId)?.title || ''}
+      />
+
     </div>
   );
 }

@@ -90,7 +90,12 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                             <div className="absolute top-full mt-2 z-50 animate-fade-in">
                                 <CustomCalendar
                                     selectedDate={fromDate}
-                                    onSelect={onFromChange}
+                                    onSelect={(date) => {
+                                        onFromChange(date);
+                                        setShowFromCalendar(false);
+                                        // Auto-open To calendar after selecting From
+                                        setTimeout(() => setShowToCalendar(true), 100);
+                                    }}
                                     onClose={() => setShowFromCalendar(false)}
                                     rangeStart={fromDate}
                                     rangeEnd={toDate}
@@ -147,13 +152,13 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                     onClick={() => onQuickSelect('week')}
                     className="flex-1 px-3 py-2 text-xs font-semibold cursor-pointer text-neutral-600 border border-stroke hover:bg-neutral-50 rounded-xl transition-colors"
                 >
-                    This Week
+                    Week
                 </button>
                 <button
                     onClick={() => onQuickSelect('month')}
                     className="flex-1 px-3 py-2 text-xs font-semibold cursor-pointer text-neutral-600 border border-stroke hover:bg-neutral-50 rounded-xl transition-colors"
                 >
-                    This Month
+                    Month
                 </button>
             </div>
         </div>

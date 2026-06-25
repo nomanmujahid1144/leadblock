@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import LeadCard from './LeadCard';
 import { DoubleArrowIcon, DotsHorizontalViewMoreIcon } from '../Icons';
@@ -15,20 +15,36 @@ interface KanbanColumnProps {
     allColumns?: { id: string; title: string }[];
     onMoveCard?: (cardId: string, targetColumnId: string) => void;
     onLeadClick?: (lead: any) => void;
+    onEditPhase?: (columnId: string) => void;
+    onDeletePhase?: (columnId: string) => void;
+    onMoveColumnLeft?: (columnId: string) => void;
+    onMoveColumnRight?: (columnId: string) => void;
+    isCollapsed?: boolean;
+    onToggleCollapse?: (columnId: string, collapsed: boolean) => void;
+    overCardId?: string | null;
 }
 
 const KanbanColumn: React.FC<KanbanColumnProps> = ({
-    id,
-    title,
-    count,
-    color = 'bg-neutral-100',
-    cards = [],
-    isVertical = false,
-    allColumns = [],
-    onMoveCard,
-    onLeadClick
+    id, title, count, color = 'bg-neutral-100', cards = [],
+    isVertical = false, allColumns = [], onMoveCard, onLeadClick,
+    onEditPhase, onDeletePhase, onMoveColumnLeft, onMoveColumnRight,
+    isCollapsed = false, onToggleCollapse, overCardId
 }) => {
-    const [isCollapsed, setIsCollapsed] = useState(false);
+
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setIsMenuOpen(false);
+            }
+        };
+        if (isMenuOpen) document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isMenuOpen]);
+
 
     // Make this column a drop zone
     const { setNodeRef, isOver } = useDroppable({
@@ -67,7 +83,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                     {/* Bottom: Expand Icon */}
                     <div className="pb-4">
                         <button
-                            onClick={() => setIsCollapsed(false)}
+                            onClick={() => onToggleCollapse?.(id, false)}
                             className="cursor-pointer rotate-90 hover:scale-110 transition-transform"
                             aria-label="Expand column"
                         >
@@ -93,7 +109,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                     <div className="flex items-center gap-1">
                         {/* Collapse Button */}
                         <button
-                            onClick={() => setIsCollapsed(true)}
+                            onClick={() => onToggleCollapse?.(id, true)}
                             className="cursor-pointer hover:bg-neutral-100 p-1 rounded-lg transition-all"
                             aria-label="Collapse column"
                         >
@@ -101,9 +117,44 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                         </button>
 
                         {/* Menu Button */}
-                        <button className="cursor-pointer hover:bg-neutral-100 p-1 rounded-lg transition-all">
-                            <DotsHorizontalViewMoreIcon size={22} />
-                        </button>
+                        <div className="relative" ref={menuRef}>
+                            <button
+                                className="cursor-pointer hover:bg-neutral-100 p-1 rounded-lg transition-all"
+                                onClick={(e) => { e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }}
+                            >
+                                <DotsHorizontalViewMoreIcon size={22} />
+                            </button>
+
+                            {isMenuOpen && (
+                                <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-stroke rounded-xl shadow-lg z-50 animate-fade-in py-1">
+                                    <button
+                                        onClick={() => { onMoveColumnLeft?.(id); setIsMenuOpen(false); }}
+                                        className="w-full px-4 py-2 text-sm text-text-heading text-left hover:bg-neutral-50 transition-colors flex items-center gap-2"
+                                    >
+                                        ← Move left
+                                    </button>
+                                    <button
+                                        onClick={() => { onMoveColumnRight?.(id); setIsMenuOpen(false); }}
+                                        className="w-full px-4 py-2 text-sm text-text-heading text-left hover:bg-neutral-50 transition-colors flex items-center gap-2"
+                                    >
+                                        → Move right
+                                    </button>
+                                    <div className="my-1 border-t border-stroke" />
+                                    <button
+                                        onClick={() => { onEditPhase?.(id); setIsMenuOpen(false); }}
+                                        className="w-full px-4 py-2 text-sm text-text-heading text-left hover:bg-neutral-50 transition-colors"
+                                    >
+                                        Edit phase
+                                    </button>
+                                    <button
+                                        onClick={() => { onDeletePhase?.(id); setIsMenuOpen(false); }}
+                                        className="w-full px-4 py-2 text-sm text-primary text-left hover:bg-neutral-50 transition-colors"
+                                    >
+                                        Delete phase
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -116,16 +167,20 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                 >
                     {cards.length > 0 ? (
                         cards.map((card, index) => (
-                            <LeadCard
-                                key={card.id}
-                                {...card}
-                                index={index}
-                                currentColumnId={id}
-                                allColumns={allColumns}
-                                onMove={onMoveCard}
-                                onLeadClick={onLeadClick} // Add this
-                                phaseColor={color} // Add this
-                            />
+                            <div key={card.id} className="relative">
+                                {overCardId === card.id && (
+                                    <div className="absolute -top-1.5 left-0 right-0 h-0.5 bg-primary-button rounded-full z-20 animate-fade-in" />
+                                )}
+                                <LeadCard
+                                    {...card}
+                                    index={index}
+                                    currentColumnId={id}
+                                    allColumns={allColumns}
+                                    onMove={onMoveCard}
+                                    onLeadClick={onLeadClick} // Add this
+                                    phaseColor={color} // Add this
+                                />
+                            </div>
                         ))
                     ) : (
                         <div className="text-center py-20 bg-card-bg rounded-lg border-none">
@@ -165,7 +220,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                 {/* Bottom: Expand Icon */}
                 <div className="pb-4">
                     <button
-                        onClick={() => setIsCollapsed(false)}
+                        onClick={() => onToggleCollapse?.(id, false)}
                         className="cursor-pointer rotate-90 hover:scale-110 transition-transform"
                         aria-label="Expand column"
                     >
@@ -193,7 +248,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
-                            setIsCollapsed(true);
+                            onToggleCollapse?.(id, true);
                         }}
                         className="cursor-pointer hover:bg-neutral-100 p-1 rounded-lg transition-all"
                         aria-label="Collapse column"
@@ -202,12 +257,44 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                     </button>
 
                     {/* Menu Button */}
-                    <button
-                        className="cursor-pointer hover:bg-neutral-100 p-1 rounded-lg transition-all"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <DotsHorizontalViewMoreIcon size={22} />
-                    </button>
+                    <div className="relative" ref={menuRef}>
+                        <button
+                            className="cursor-pointer hover:bg-neutral-100 p-1 rounded-lg transition-all"
+                            onClick={(e) => { e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }}
+                        >
+                            <DotsHorizontalViewMoreIcon size={22} />
+                        </button>
+
+                        {isMenuOpen && (
+                            <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-stroke rounded-xl shadow-lg z-50 animate-fade-in py-1">
+                                <button
+                                    onClick={() => { onMoveColumnLeft?.(id); setIsMenuOpen(false); }}
+                                    className="w-full px-4 py-2 text-sm text-text-heading text-left hover:bg-neutral-50 transition-colors flex items-center gap-2"
+                                >
+                                    ← Move left
+                                </button>
+                                <button
+                                    onClick={() => { onMoveColumnRight?.(id); setIsMenuOpen(false); }}
+                                    className="w-full px-4 py-2 text-sm text-text-heading text-left hover:bg-neutral-50 transition-colors flex items-center gap-2"
+                                >
+                                    → Move right
+                                </button>
+                                <div className="my-1 border-t border-stroke" />
+                                <button
+                                    onClick={() => { onEditPhase?.(id); setIsMenuOpen(false); }}
+                                    className="w-full px-4 py-2 text-sm text-text-heading text-left hover:bg-neutral-50 transition-colors"
+                                >
+                                    Edit phase
+                                </button>
+                                <button
+                                    onClick={() => { onDeletePhase?.(id); setIsMenuOpen(false); }}
+                                    className="w-full px-4 py-2 text-sm text-primary text-left hover:bg-neutral-50 transition-colors"
+                                >
+                                    Delete phase
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -220,16 +307,21 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
             >
                 {cards.length > 0 ? (
                     cards.map((card, index) => (
-                        <LeadCard
-                            key={card.id}
-                            {...card}
-                            index={index}
-                            currentColumnId={id}
-                            allColumns={allColumns}
-                            onMove={onMoveCard}
-                            onLeadClick={onLeadClick}
-                            phaseColor={color}
-                        />
+                        <div key={card.id} className="relative">
+                            {overCardId === card.id && (
+                                <div className="absolute -top-1.5 left-0 right-0 h-0.5 bg-primary-button rounded-full z-20 animate-fade-in" />
+                            )}
+                            <LeadCard
+                                key={card.id}
+                                {...card}
+                                index={index}
+                                currentColumnId={id}
+                                allColumns={allColumns}
+                                onMove={onMoveCard}
+                                onLeadClick={onLeadClick}
+                                phaseColor={color}
+                            />
+                        </div>
                     ))
                 ) : (
                     <div className="text-center py-12 bg-card-bg">

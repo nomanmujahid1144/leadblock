@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Modal from '../Modal';
 import { AtRateIcon, CalendarIcon } from '../Icons';
 import { toast } from '@/lib/toast';
@@ -11,20 +11,55 @@ interface AddTaskModalProps {
     onSubmit: (task: { title: string; note: string; dueDate: string; assignTo: string }) => void;
 }
 
+const ASSIGN_OPTIONS = ['chatter', 'internal'];
+
 const AddTaskModal: React.FC<AddTaskModalProps> = ({ isOpen, onClose, onSubmit }) => {
     const [title, setTitle] = useState('');
     const [note, setNote] = useState('');
     const [dueDate, setDueDate] = useState('');
     const [assignTo, setAssignTo] = useState('');
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const dateInputRef = useRef<HTMLInputElement>(null);
+    const assignRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (assignRef.current && !assignRef.current.contains(event.target as Node)) {
+                setShowSuggestions(false);
+            }
+        };
+        if (showSuggestions) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showSuggestions]);
+
+    const handleAssignChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setAssignTo(e.target.value);
+        setShowSuggestions(true);
+    };
+
+    const filteredOptions = ASSIGN_OPTIONS.filter(option =>
+        option.toLowerCase().includes(assignTo.toLowerCase())
+    );
+
+    const handleSuggestionSelect = (option: string) => {
+        setAssignTo(option);
+        setShowSuggestions(false);
+    };
+
+    const formatDisplayDate = (value: string): string => {
+        if (!value) return '';
+        const date = new Date(value + 'T00:00:00');
+        return `${date.getDate()}-${date.toLocaleString('en-US', { month: 'short' })}-${date.getFullYear()}`;
+    };
 
     const handleSubmit = () => {
         if (title.trim()) {
             onSubmit({ title, note, dueDate, assignTo });
-            
-            // Show success toast
             toast.success('Task created successfully');
-            
-            // Reset form
             setTitle('');
             setNote('');
             setDueDate('');
@@ -34,7 +69,6 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ isOpen, onClose, onSubmit }
     };
 
     const handleCancel = () => {
-        // Reset form
         setTitle('');
         setNote('');
         setDueDate('');
@@ -84,25 +118,25 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ isOpen, onClose, onSubmit }
                 <label className="block text-xs md:text-sm font-medium text-text-heading mb-2">
                     Due date
                 </label>
-                <div className="relative">
+                <div
+                    className="relative cursor-pointer"
+                    onClick={() => dateInputRef.current?.showPicker()}
+                >
                     <CalendarIcon
                         size={16}
                         className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none z-10"
                     />
+                    <div className="w-full px-3 md:px-4 py-2.5 md:py-3 !pl-9 border border-neutral-200 rounded-lg text-sm">
+                        <span className={dueDate ? 'text-text-heading' : 'text-neutral-400'}>
+                            {dueDate ? formatDisplayDate(dueDate) : 'Pick a date'}
+                        </span>
+                    </div>
                     <input
-                        type="text"
-                        placeholder="Pick a date"
+                        ref={dateInputRef}
+                        type="date"
                         value={dueDate}
-                        onFocus={(e) => {
-                            e.target.type = 'date';
-                        }}
-                        onBlur={(e) => {
-                            if (!e.target.value) {
-                                e.target.type = 'text';
-                            }
-                        }}
                         onChange={(e) => setDueDate(e.target.value)}
-                        className="w-full px-3 md:px-4 py-2.5 md:py-3 pl-10 border border-neutral-200 rounded-lg text-sm text-neutral-400 placeholder:text-neutral-400 transition-all focus:outline-none focus:ring-2 focus:ring-primary-button"
+                        className="sr-only"
                     />
                 </div>
             </div>
@@ -112,15 +146,30 @@ const AddTaskModal: React.FC<AddTaskModalProps> = ({ isOpen, onClose, onSubmit }
                 <label className="block text-xs md:text-sm font-medium text-text-heading mb-2">
                     Assign to chatter or internal task
                 </label>
-                <div className="relative">
+                <div className="relative" ref={assignRef}>
                     <input
                         type="text"
-                        placeholder="Name chatter"
                         value={assignTo}
-                        onChange={(e) => setAssignTo(e.target.value)}
-                        className="w-full px-3 md:px-4 py-2.5 md:py-3 pl-10 border border-neutral-200 rounded-lg text-sm text-text-heading placeholder:text-neutral-400 transition-all focus:outline-none focus:ring-2 focus:ring-primary-button"
+                        onChange={handleAssignChange}
+                        onFocus={() => setShowSuggestions(true)}
+                        className="w-full px-3 md:px-4 py-2.5 md:py-3 !pl-9 border border-neutral-200 rounded-lg text-sm text-text-heading placeholder:text-neutral-400 transition-all focus:outline-none focus:ring-2 focus:ring-primary-button"
                     />
                     <AtRateIcon className='absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none' size={16} />
+
+                    {showSuggestions && filteredOptions.length > 0 && (
+                        <div className="absolute top-full left-0 mt-1 w-full bg-white border border-stroke rounded-lg shadow-lg z-50 animate-fade-in py-1">
+                            {filteredOptions.map((option) => (
+                                <button
+                                    key={option}
+                                    type="button"
+                                    onMouseDown={() => handleSuggestionSelect(option)}
+                                    className="w-full px-4 py-2 text-sm text-text-heading text-left hover:bg-neutral-50 transition-colors"
+                                >
+                                    {option}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 

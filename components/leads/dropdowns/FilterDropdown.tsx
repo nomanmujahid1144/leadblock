@@ -8,6 +8,10 @@ import CompanySelect from './CompanySelect';
 import RoleSelect from './RoleSelect';
 import LeadPhaseSelect from './LeadPhaseSelect';
 import SentimentSelect from './SentimentSelect';
+import CrmSelect from './CrmSelect';
+import ContactDetailsSelect from './ContactDetailsSelect';
+import InternalTaskSelect from './InternalTaskSelect';
+import BlacklistSelect from './BlacklistSelect';
 
 interface FilterState {
     lastMessageFrom: string;
@@ -18,6 +22,10 @@ interface FilterState {
     role: string;
     leadPhases: string[];
     sentiments: string[];
+    crm: string;
+    contactDetails: string;
+    internalTask: string;
+    blacklist: string;
 }
 
 interface FilterDropdownProps {
@@ -32,7 +40,7 @@ const getToday = () => {
 const getDateRange = (type: 'today' | 'week' | 'month') => {
     const today = new Date();
     const from = new Date();
-    
+
     if (type === 'today') {
         return { from: getToday(), to: getToday() };
     } else if (type === 'week') {
@@ -40,7 +48,7 @@ const getDateRange = (type: 'today' | 'week' | 'month') => {
     } else if (type === 'month') {
         from.setMonth(today.getMonth() - 1);
     }
-    
+
     return {
         from: from.toISOString().split('T')[0],
         to: getToday()
@@ -59,7 +67,11 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({ onFilterApply }) => {
         company: '',
         role: '',
         leadPhases: [],
-        sentiments: []
+        sentiments: [],
+        crm: '',
+        contactDetails: '',
+        internalTask: '',
+        blacklist: '',
     });
 
     const handleResetAll = () => {
@@ -71,7 +83,11 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({ onFilterApply }) => {
             company: '',
             role: '',
             leadPhases: [],
-            sentiments: []
+            sentiments: [],
+            crm: '',
+            contactDetails: '',
+            internalTask: '',
+            blacklist: '',
         };
         setFilters(emptyFilters);
         onFilterApply(emptyFilters); // Apply empty filters
@@ -126,10 +142,10 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({ onFilterApply }) => {
                             onReset={() => setFilters(prev => ({ ...prev, lastMessageFrom: '', lastMessageTo: '' }))}
                             onQuickSelect={(range) => {
                                 const dates = getDateRange(range);
-                                setFilters(prev => ({ 
-                                    ...prev, 
-                                    lastMessageFrom: dates.from, 
-                                    lastMessageTo: dates.to 
+                                setFilters(prev => ({
+                                    ...prev,
+                                    lastMessageFrom: dates.from,
+                                    lastMessageTo: dates.to
                                 }));
                             }}
                         />
@@ -144,10 +160,10 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({ onFilterApply }) => {
                             onReset={() => setFilters(prev => ({ ...prev, internalTaskFrom: '', internalTaskTo: '' }))}
                             onQuickSelect={(range) => {
                                 const dates = getDateRange(range);
-                                setFilters(prev => ({ 
-                                    ...prev, 
-                                    internalTaskFrom: dates.from, 
-                                    internalTaskTo: dates.to 
+                                setFilters(prev => ({
+                                    ...prev,
+                                    internalTaskFrom: dates.from,
+                                    internalTaskTo: dates.to
                                 }));
                             }}
                         />
@@ -178,6 +194,34 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({ onFilterApply }) => {
                             selectedSentiments={filters.sentiments}
                             onToggle={toggleSentiment}
                             onReset={() => setFilters(prev => ({ ...prev, sentiments: [] }))}
+                        />
+
+                        {/* CRM */}
+                        <CrmSelect
+                            selectedCrm={filters.crm}
+                            onSelect={(crm) => setFilters(prev => ({ ...prev, crm }))}
+                            onReset={() => setFilters(prev => ({ ...prev, crm: '' }))}
+                        />
+
+                        {/* Contact Details */}
+                        <ContactDetailsSelect
+                            selectedContact={filters.contactDetails}
+                            onSelect={(contactDetails) => setFilters(prev => ({ ...prev, contactDetails }))}
+                            onReset={() => setFilters(prev => ({ ...prev, contactDetails: '' }))}
+                        />
+
+                        {/* Internal Task */}
+                        <InternalTaskSelect
+                            selectedTask={filters.internalTask}
+                            onSelect={(internalTask) => setFilters(prev => ({ ...prev, internalTask }))}
+                            onReset={() => setFilters(prev => ({ ...prev, internalTask: '' }))}
+                        />
+
+                        {/* Blacklisted */}
+                        <BlacklistSelect
+                            selectedBlacklist={filters.blacklist}
+                            onSelect={(blacklist) => setFilters(prev => ({ ...prev, blacklist }))}
+                            onReset={() => setFilters(prev => ({ ...prev, blacklist: '' }))}
                         />
                     </div>
 
